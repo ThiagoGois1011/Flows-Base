@@ -1,6 +1,11 @@
-import { redirect } from "next/navigation";
+import HomeSidebar from "@/components/HomeSidebar/HomeSidebar";
+import HomeWelcome from "@/components/HomeWelcome/HomeWelcome";
 
 export default function Home() {
-  redirect("/flows");
-  return null;
+  return (
+    <div className="flex h-screen">
+      <HomeSidebar />
+      <HomeWelcome />
+    </div>
+  );
 }
