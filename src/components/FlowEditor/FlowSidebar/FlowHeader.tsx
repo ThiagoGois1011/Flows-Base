@@ -5,11 +5,13 @@ interface FlowHeaderProps {
   onAddFlow: () => void;
 }
 
-export const FlowHeader: React.FC<FlowHeaderProps> = ({ onAddFlow }) => (
+export const FlowHeader: React.FC<FlowHeaderProps> = ({ onAddFlow, showButton = true }) => (
   <div className="flex items-center justify-between mb-2">
     <span className="font-bold text-lg">Flows</span>
-    <Button size="icon" variant="outline" onClick={onAddFlow}>
-      <PlusIcon />
-    </Button>
+    {showButton && (
+      <Button size="icon" variant="outline" onClick={onAddFlow}>
+        <PlusIcon />
+      </Button>
+    )}
   </div>
 ); 

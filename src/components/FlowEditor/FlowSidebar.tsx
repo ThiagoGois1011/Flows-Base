@@ -31,7 +31,7 @@ export default function FlowSidebar() {
   };
 
   return (
-    <Card className="w-[260px] min-h-screen rounded-none border-r shadow-none">
+    <Card className="w-[300px] min-h-screen rounded-none border-r shadow-none">
       <CardContent className="p-4 flex flex-col gap-4">
         <FlowHeader onAddFlow={handleAddFlow} />
         <FlowSelector
