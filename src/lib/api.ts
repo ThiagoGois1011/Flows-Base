@@ -10,4 +10,18 @@ export const getFlows = async () => {
 export const getFlowById = async (id: string) => {
   const { data } = await axios.get(`${API_URL}/flows/${id}`);
   return data;
+};
+
+export const createFlow = async (name: string) => {
+  const { data } = await axios.post(`${API_URL}/flows`, {
+    data: {
+      name,
+      status: "draft",
+      data: {
+        edges: [],
+        nodes: []
+      }
+    }
+  });
+  return data;
 }; 

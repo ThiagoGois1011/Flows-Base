@@ -8,7 +8,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useFlows } from '@/contexts/FlowContext';
-import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { ChevronLeftIcon, ChevronRightIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import { useRouter } from 'next/navigation';
 
@@ -44,9 +44,17 @@ export default function FlowSelectorModal({ isOpen, onClose }: FlowSelectorModal
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[800px]">
+        <DialogHeader className="relative">
           <DialogTitle>Selecione um Flow</DialogTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-8 w-8 rounded-full hover:border hover:border-black/10"
+            onClick={onClose}
+          >
+            <Cross2Icon className="h-5 w-5" />
+          </Button>
         </DialogHeader>
 
         {isLoading ? (
