@@ -13,7 +13,7 @@ export default function Home() {
     <FlowProvider>
       <div className="flex h-screen">
         <HomeSidebar />
-        <HomeWelcome onNewFlow={() => setIsModalOpen(true)} />
+        <HomeWelcome />
         <FlowSelectorModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 

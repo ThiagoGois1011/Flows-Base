@@ -1,8 +1,9 @@
 'use client';
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FlowProvider } from "@/contexts/FlowContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const inter = Inter({ subsets: ["latin"] });
 

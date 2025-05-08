@@ -11,12 +11,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { createFlow } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
+import { Cross2Icon } from "@radix-ui/react-icons";
 
 export default function FlowActions() {
   const [isSelectorModalOpen, setIsSelectorModalOpen] = React.useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [newFlowName, setNewFlowName] = React.useState('');
+  const [error, setError] = React.useState<string | null>(null);
   const router = useRouter();
+
+  const createFlowMutation = useMutation({
+    mutationFn: createFlow,
+    onSuccess: (data) => {
+      setIsCreateModalOpen(false);
+      setNewFlowName('');
+      setError(null);
+      router.push(`/editor/${data.data.id}`);
+    },
+    onError: (error: any) => {
+      setError(error.response?.data?.message || 'Erro ao criar flow');
+    }
+  });
 
   const handleSelectFlow = () => {
     setIsSelectorModalOpen(true);
@@ -24,17 +40,15 @@ export default function FlowActions() {
 
   const handleCreateFlow = () => {
     setIsCreateModalOpen(true);
+    setError(null);
   };
 
-  const handleCreateFlowSubmit = async () => {
-    try {
-      const response = await createFlow(newFlowName);
-      setIsCreateModalOpen(false);
-      setNewFlowName('');
-      router.push(`/editor/${response.data.id}`);
-    } catch (error) {
-      console.error('Erro ao criar flow:', error);
+  const handleCreateFlowSubmit = () => {
+    if (!newFlowName.trim()) {
+      setError('Erro ao criar flow');
+      return;
     }
+    createFlowMutation.mutate(newFlowName);
   };
 
   return (
@@ -63,22 +77,37 @@ export default function FlowActions() {
 
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent>
-          <DialogHeader>
+          <DialogHeader className="relative">
             <DialogTitle>Criar Novo Flow</DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4 h-8 w-8 rounded-full hover:border hover:border-black/10"
+              onClick={() => setIsCreateModalOpen(false)}
+            >
+              <Cross2Icon className="h-5 w-5" />
+            </Button>
           </DialogHeader>
           <div className="py-4">
             <Input
               placeholder="Nome do Flow"
               value={newFlowName}
               onChange={(e) => setNewFlowName(e.target.value)}
+              className={error ? "border-destructive" : ""}
             />
+            {error && (
+              <p className="text-sm text-destructive mt-2">{error}</p>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleCreateFlowSubmit}>
-              Criar
+            <Button 
+              onClick={handleCreateFlowSubmit}
+              disabled={createFlowMutation.isPending}
+            >
+              {createFlowMutation.isPending ? "Criando..." : "Criar"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -8,7 +8,7 @@ export default function HomeSidebar() {
   return (
     <Card className="w-[300px] min-h-screen rounded-none border-r shadow-none">
       <CardContent className="p-4 flex flex-col gap-4">
-        <FlowHeader onAddFlow={() => {}} showButton={false} />
+        <FlowHeader />
         <FlowActions />
       </CardContent>
     </Card>

@@ -155,7 +155,7 @@ export default function FlowEditor({ flow }: { flow: Flow }) {
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>
-      <FlowSidebar />
+      <FlowSidebar flow={flow} />
       <div style={{ flex: 1, height: "100%", display: "flex", flexDirection: "column" }}>
         <FlowTopbar flowName={flow.attributes.name} />
         <div style={{ flex: 1, height: "100%" }}>

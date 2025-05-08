@@ -24,4 +24,9 @@ export const createFlow = async (name: string) => {
     }
   });
   return data;
+};
+
+export const deleteFlow = async (id: string) => {
+  const { data } = await axios.delete(`${API_URL}/flows/${id}`);
+  return data;
 }; 
