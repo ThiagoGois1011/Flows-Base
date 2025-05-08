@@ -26,6 +26,8 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
       const response = await getFlows();
       return response.data;
     },
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   return (

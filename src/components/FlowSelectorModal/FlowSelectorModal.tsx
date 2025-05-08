@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useFlows } from '@/contexts/FlowContext';
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
+import { useRouter } from 'next/navigation';
 
 interface FlowSelectorModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface FlowSelectorModalProps {
 export default function FlowSelectorModal({ isOpen, onClose }: FlowSelectorModalProps) {
   const { flows, isLoading, error, refetch } = useFlows();
   const [currentPage, setCurrentPage] = React.useState(0);
+  const router = useRouter();
   const itemsPerPage = 9;
   const totalPages = Math.ceil(flows.length / itemsPerPage);
 
@@ -28,6 +30,11 @@ export default function FlowSelectorModal({ isOpen, onClose }: FlowSelectorModal
 
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1));
+  };
+
+  const handleFlowSelect = (flowId: string) => {
+    router.push(`/editor/${flowId}`);
+    onClose();
   };
 
   const currentFlows = flows.slice(
@@ -58,11 +65,7 @@ export default function FlowSelectorModal({ isOpen, onClose }: FlowSelectorModal
                 <Card
                   key={flow.id}
                   className="cursor-pointer hover:border-primary transition-colors"
-                  onClick={() => {
-                    // Implementar lógica de seleção do flow
-                    console.log("Flow selecionado:", flow);
-                    onClose();
-                  }}
+                  onClick={() => handleFlowSelect(flow.id)}
                 >
                   <CardHeader>
                     <CardTitle className="text-lg">{flow.attributes.name}</CardTitle>
