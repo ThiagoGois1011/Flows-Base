@@ -77,8 +77,8 @@ export const CustomNode = ({ data, id, onDelete, onUpdate }: CustomNodeProps) =>
             <Pencil1Icon className="h-4 w-4" />
           </Button>
         </div>
-        <Card className={`px-4 py-2 min-w-[150px] border-2 ${nodeStyle}`}>
-          <div className="flex items-center justify-between gap-2">
+        <Card className="border-none shadow-none">
+          <div>
             <Handle
               type="target"
               position={Position.Left}

@@ -77,8 +77,6 @@ const defaultEdgeOptions = {
 };
 
 export default function FlowEditor({ flow }: FlowEditorProps) {
-  console.log(flow);
-  
   const [nodes, setNodes] = useState<Node[]>(flow.attributes.data?.nodes || []);
   const [edges, setEdges] = useState<Edge[]>(flow.attributes.data?.edges || []);
 
