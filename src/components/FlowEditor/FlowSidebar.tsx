@@ -12,14 +12,19 @@ import { FlowInfo } from "./FlowSidebar/FlowInfo";
 import { useParams } from "next/navigation";
 import { useFlows } from "@/contexts/FlowContext";
 
-export default function FlowSidebar({ flow }: { flow: Flow }) {
+interface FlowSidebarProps {
+  onComponentClick: (component: ComponentItem) => void;
+  flow: Flow;
+}
+
+export default function FlowSidebar({ onComponentClick, flow }: FlowSidebarProps) {
   const { flows, selectedFlow, addFlow, selectFlow } = useFlows();
 
   const handleComponentClick = (component: ComponentItem) => {
     // Implementar lógica de seleção de componente
     console.log("Componente selecionado:", component);
   };
-  console.log(flow);
+
   
   return (
     <Card className="w-[300px] min-h-screen rounded-none border-r shadow-none">
@@ -30,7 +35,7 @@ export default function FlowSidebar({ flow }: { flow: Flow }) {
         <Separator />
         <ComponentList
           components={DEFAULT_COMPONENTS}
-          onComponentClick={handleComponentClick}
+          onComponentClick={onComponentClick}
         />
       </CardContent>
     </Card>

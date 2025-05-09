@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState, useMemo } from "react";
+import React, { useCallback, useState, useMemo, useEffect } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -11,155 +11,137 @@ import ReactFlow, {
   NodeTypes,
   EdgeTypes,
   NodeChange,
+  Position,
+  applyNodeChanges,
+  applyEdgeChanges,
+  MarkerType,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import FlowSidebar from "./FlowSidebar";
 import FlowTopbar from "./FlowTopbar";
-
-// Definindo os tipos de nós e arestas fora do componente
-const nodeTypes: NodeTypes = {
-  default: ReactFlow.Node,
-  trigger: ReactFlow.Node,
-  action: ReactFlow.Node,
-  condition: ReactFlow.Node,
-};
-
-const edgeTypes: EdgeTypes = {
-  default: ReactFlow.Edge,
-};
+import { ComponentItem } from "@/types";
+import { CustomNode } from "./nodes";
 
 interface FlowData {
   edges: Edge[];
   nodes: Node[];
 }
 
-interface FlowAttributes {
-  name: string;
-  description?: string;
-  data: FlowData;
+interface FlowEditorProps {
+  flow: FlowData;
 }
 
-interface Flow {
-  id: number;
-  attributes: FlowAttributes;
-}
-
-// Função para validar e formatar os nodes
-const formatNodes = (nodes: Node[]): Node[] => {
-  if (!Array.isArray(nodes)) return [];
-  
-  return nodes.map((node, index) => {
-    // Garante que o node tenha um ID
-    const id = node.id || `node-${index}`;
-    
-    // Garante que o node tenha uma posição válida
-    const position = {
-      x: node.position?.x ?? 0,
-      y: node.position?.y ?? 0,
-    };
-
-    // Garante que o node tenha dados válidos
-    const data = {
-      label: node.data?.label || 'Node',
-      ...node.data,
-    };
-
-    return {
-      id,
-      type: node.type || 'default',
-      position,
-      data,
-      width: node.width || 150,
-      height: node.height || 40,
-      selected: node.selected || false,
-      dragging: node.dragging || false,
-    };
-  });
+const edgeTypes: EdgeTypes = {
+  default: ReactFlow.Edge,
 };
 
-// Função para validar e formatar as edges
-const formatEdges = (edges: Edge[]): Edge[] => {
-  if (!Array.isArray(edges)) return [];
-  
-  return edges.map((edge, index) => ({
-    id: edge.id || `edge-${index}`,
-    source: edge.source,
-    target: edge.target,
-    type: edge.type || 'default',
-  }));
+const defaultEdgeOptions = {
+  type: 'smoothstep',
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+  },
+  style: { strokeWidth: 2 },
 };
 
-export default function FlowEditor({ flow }: { flow: Flow }) {
-  const [nodes, setNodes] = useState<Node[]>(() => 
-    formatNodes(flow.attributes.data.nodes || [])
-  );
-  const [edges, setEdges] = useState<Edge[]>(() => 
-    formatEdges(flow.attributes.data.edges || [])
-  );
+export default function FlowEditor({ flow }: FlowEditorProps) {
+  const [nodes, setNodes] = useState<Node[]>(flow.nodes || []);
+  const [edges, setEdges] = useState<Edge[]>(flow.edges || []);
 
-  const onConnect = useCallback(
-    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
-    []
-  );
-
-  const onNodesChange = useCallback((changes: NodeChange[]) => {
-    setNodes((nds) => {
-      return nds.map((node) => {
-        const change = changes.find((c) => c.id === node.id);
-        if (!change) return node;
-
-        // Preserva os dados originais do node
-        const updatedNode = { ...node };
-
-        if (change.type === 'position' && 'position' in change) {
-          updatedNode.position = change.position;
-        } else if (change.type === 'dimensions' && 'dimensions' in change) {
-          updatedNode.width = change.dimensions.width;
-          updatedNode.height = change.dimensions.height;
-        } else if (change.type === 'select') {
-          updatedNode.selected = change.selected;
-        }
-
-        return updatedNode;
-      });
-    });
-  }, []);
-
-  // Atualiza os nodes e edges quando o flow mudar
-  React.useEffect(() => {
-    if (flow.attributes.data.nodes) {
-      setNodes(formatNodes(flow.attributes.data.nodes));
+  useEffect(() => {
+    if (flow.nodes) {
+      setNodes(flow.nodes);
     }
-    if (flow.attributes.data.edges) {
-      setEdges(formatEdges(flow.attributes.data.edges));
+    if (flow.edges) {
+      setEdges(flow.edges);
     }
   }, [flow]);
 
-  // Memoize o ReactFlow para evitar re-renders desnecessários
-  const reactFlowInstance = useMemo(() => (
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={setEdges}
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        fitView
-      >
-        <MiniMap />
-        <Controls />
-        <Background />
-      </ReactFlow>
-    ), [nodes, edges, onConnect, onNodesChange]);
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      setNodes((nds) => applyNodeChanges(changes, nds));
+    },
+    []
+  );
+
+  const onEdgesChange = useCallback(
+    (changes: any) => {
+      setEdges((eds) => applyEdgeChanges(changes, eds));
+    },
+    []
+  );
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      setEdges((eds) => addEdge({ ...connection, ...defaultEdgeOptions }, eds));
+    },
+    []
+  );
+
+  const handleComponentClick = (component: ComponentItem) => {
+    const newNode: Node = {
+      id: `${component.id}-${Date.now()}`,
+      type: 'default',
+      position: { x: 100, y: 100 },
+      data: { 
+        label: component.name,
+        type: component.type || 'default'
+      },
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
+    };
+    
+    setNodes((nds) => [...nds, newNode]);
+  };
+
+  const handleDeleteNode = (nodeId: string) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+  };
+
+  const handleUpdateNode = (nodeId: string, data: { label: string; type: string }) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === nodeId
+          ? { ...node, data: { ...node.data, ...data } }
+          : node
+      )
+    );
+  };
+
+  const nodeTypes = useMemo(
+    () => ({
+      default: (props: any) => (
+        <CustomNode
+          {...props}
+          onDelete={handleDeleteNode}
+          onUpdate={handleUpdateNode}
+        />
+      ),
+    }),
+    []
+  );
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <FlowSidebar flow={flow} />
-      <div style={{ flex: 1, height: "100%", display: "flex", flexDirection: "column" }}>
-        <FlowTopbar flowName={flow.attributes.name} />
-        <div style={{ flex: 1, height: "100%" }}>
-          {reactFlowInstance}
+    <div className="flex h-screen">
+      <FlowSidebar onComponentClick={handleComponentClick} flow={flow} />
+      <div className="flex-1">
+        <FlowTopbar />
+        <div className="h-[calc(100vh-48px)]">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            defaultEdgeOptions={defaultEdgeOptions}
+            fitView
+          >
+            <Background />
+            <Controls />
+            <MiniMap />
+          </ReactFlow>
         </div>
       </div>
     </div>
