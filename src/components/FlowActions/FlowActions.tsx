@@ -9,30 +9,15 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { createFlow } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
-import { Cross2Icon } from "@radix-ui/react-icons";
+import { useFlowStore } from '@/store/flowStore';
 
 export default function FlowActions() {
   const [isSelectorModalOpen, setIsSelectorModalOpen] = React.useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [newFlowName, setNewFlowName] = React.useState('');
-  const [error, setError] = React.useState<string | null>(null);
   const router = useRouter();
-
-  const createFlowMutation = useMutation({
-    mutationFn: createFlow,
-    onSuccess: (data) => {
-      setIsCreateModalOpen(false);
-      setNewFlowName('');
-      setError(null);
-      router.push(`/editor/${data.data.id}`);
-    },
-    onError: (error: any) => {
-      setError(error.response?.data?.message || 'Erro ao criar flow');
-    }
-  });
+  const { createFlow, isLoading, error } = useFlowStore();
 
   const handleSelectFlow = () => {
     setIsSelectorModalOpen(true);
@@ -40,29 +25,33 @@ export default function FlowActions() {
 
   const handleCreateFlow = () => {
     setIsCreateModalOpen(true);
-    setError(null);
   };
 
-  const handleCreateFlowSubmit = () => {
+  const handleCreateFlowSubmit = async () => {
     if (!newFlowName.trim()) {
-      setError('Erro ao criar flow');
       return;
     }
-    createFlowMutation.mutate(newFlowName);
+
+    const newFlow = await createFlow(newFlowName);
+    if (newFlow) {
+      setIsCreateModalOpen(false);
+      setNewFlowName('');
+      router.push(`/editor/${newFlow.id}`);
+    }
   };
 
   return (
     <>
       <div className="flex gap-2">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="flex-1"
           onClick={handleSelectFlow}
         >
           Selecione um Flow
         </Button>
-        <Button 
-          variant="default" 
+        <Button
+          variant="default"
           className="flex-1"
           onClick={handleCreateFlow}
         >
@@ -70,7 +59,7 @@ export default function FlowActions() {
         </Button>
       </div>
 
-      <FlowSelectorModal 
+      <FlowSelectorModal
         isOpen={isSelectorModalOpen}
         onClose={() => setIsSelectorModalOpen(false)}
       />
@@ -86,20 +75,25 @@ export default function FlowActions() {
               value={newFlowName}
               onChange={(e) => setNewFlowName(e.target.value)}
               className={error ? "border-destructive" : ""}
+              disabled={isLoading}
             />
             {error && (
               <p className="text-sm text-destructive mt-2">{error}</p>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateModalOpen(false)}
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
-            <Button 
+            <Button
               onClick={handleCreateFlowSubmit}
-              disabled={createFlowMutation.isPending}
+              disabled={isLoading || !newFlowName.trim()}
             >
-              {createFlowMutation.isPending ? "Criando..." : "Criar"}
+              {isLoading ? 'Criando...' : 'Criar'}
             </Button>
           </DialogFooter>
         </DialogContent>

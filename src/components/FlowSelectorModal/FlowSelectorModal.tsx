@@ -7,10 +7,9 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useFlows } from '@/contexts/FlowContext';
-import { ChevronLeftIcon, ChevronRightIcon, Cross2Icon } from "@radix-ui/react-icons";
-import { cn } from "@/lib/utils";
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { useRouter } from 'next/navigation';
+import { useFlowStore } from '@/store/flowStore';
 
 interface FlowSelectorModalProps {
   isOpen: boolean;
@@ -18,7 +17,7 @@ interface FlowSelectorModalProps {
 }
 
 export default function FlowSelectorModal({ isOpen, onClose }: FlowSelectorModalProps) {
-  const { flows, isLoading, error, refetch } = useFlows();
+  const { flows, isLoading, error } = useFlowStore();
   const [currentPage, setCurrentPage] = React.useState(0);
   const router = useRouter();
   const itemsPerPage = 9;
@@ -56,7 +55,7 @@ export default function FlowSelectorModal({ isOpen, onClose }: FlowSelectorModal
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-[400px] gap-4">
             <p className="text-destructive">Erro ao carregar os flows</p>
-            <Button onClick={() => refetch()}>Tentar novamente</Button>
+            <Button onClick={() => fetchFlows()}>Tentar novamente</Button>
           </div>
         ) : (
           <>

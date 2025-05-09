@@ -1,33 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import FlowEditor from '@/components/FlowEditor/FlowEditor';
-import { getFlowById } from '@/lib/api';
-import { log } from 'console';
+import { useFlowStore } from '@/store/flowStore';
 
 export default function FlowEditorPage() {
   const params = useParams();
-  const [flow, setFlow] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { setCurrentFlow, currentFlow, isLoading, error } = useFlowStore();
 
   useEffect(() => {
-    const loadFlow = async () => {
-      try {
-        setIsLoading(true);
-        const response = await getFlowById(params.id as string);
-        setFlow(response);
-        setError(null);
-      } catch (err) {
-        setError('Erro ao carregar o flow');
-        console.error('Erro ao carregar flow:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadFlow();
+    if (params.id && (!currentFlow || currentFlow.id !== params.id)) {
+      setCurrentFlow(params.id as string);
+    }
   }, [params.id]);
 
   if (isLoading) {
@@ -43,7 +28,7 @@ export default function FlowEditorPage() {
       <div className="flex flex-col items-center justify-center h-screen gap-4">
         <p className="text-destructive">{error}</p>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => setCurrentFlow(params.id as string)}
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
         >
           Tentar novamente
@@ -52,7 +37,7 @@ export default function FlowEditorPage() {
     );
   }
 
-  if (!flow) {
+  if (!currentFlow) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-destructive">Flow não encontrado</p>
@@ -60,5 +45,5 @@ export default function FlowEditorPage() {
     );
   }
 
-  return <FlowEditor flow={flow.data} />;
+  return <FlowEditor />;
 } 

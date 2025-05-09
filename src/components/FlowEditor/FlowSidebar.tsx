@@ -11,14 +11,14 @@ import FlowActions from "../FlowActions/FlowActions";
 import { FlowInfo } from "./FlowSidebar/FlowInfo";
 import { useParams } from "next/navigation";
 import { useFlows } from "@/contexts/FlowContext";
+import { useFlowStore } from "@/store/flowStore";
 
 interface FlowSidebarProps {
   onComponentClick: (component: ComponentItem) => void;
-  flow: Flow;
 }
 
-export default function FlowSidebar({ onComponentClick, flow }: FlowSidebarProps) {
-  const { flows, selectedFlow, addFlow, selectFlow } = useFlows();
+export default function FlowSidebar({ onComponentClick }: FlowSidebarProps) {
+  const { currentFlow } = useFlowStore();
 
   const handleComponentClick = (component: ComponentItem) => {
     // Implementar lógica de seleção de componente
@@ -31,7 +31,7 @@ export default function FlowSidebar({ onComponentClick, flow }: FlowSidebarProps
       <CardContent className="p-4 flex flex-col gap-4">
         <FlowHeader />
         <FlowActions />
-        <FlowInfo flowName={flow.attributes.name} flowId={flow.id} />
+        <FlowInfo flowName={currentFlow.attributes.name} flowId={currentFlow.id} />
         <Separator />
         <ComponentList
           components={DEFAULT_COMPONENTS}

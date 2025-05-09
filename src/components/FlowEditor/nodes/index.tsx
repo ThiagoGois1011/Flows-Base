@@ -18,15 +18,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NodeConfig, NodeType } from "@/types";
 
 interface CustomNodeProps {
   data: {
     label: string;
-    type: string;
+    type: NodeType;
+    config?: NodeConfig;
   };
   id: string;
   onDelete: (id: string) => void;
-  onUpdate: (id: string, data: { label: string; type: string }) => void;
+  onUpdate: (id: string, data: { label: string; type: NodeType; config?: NodeConfig }) => void;
 }
 
 const nodeTypes = {
@@ -39,7 +41,8 @@ const nodeTypes = {
 export const CustomNode = ({ data, id, onDelete, onUpdate }: CustomNodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label);
-  const [type, setType] = useState(data.type || "default");
+  const [type, setType] = useState(data.type);
+  const [config, setConfig] = useState<NodeConfig>(data.config || {});
 
   const handleDelete = () => {
     onDelete(id);
@@ -50,11 +53,57 @@ export const CustomNode = ({ data, id, onDelete, onUpdate }: CustomNodeProps) =>
   };
 
   const handleSave = () => {
-    onUpdate(id, { label, type });
+    onUpdate(id, { label, type, config });
     setIsEditing(false);
   };
 
-  const nodeStyle = nodeTypes[type as keyof typeof nodeTypes] || nodeTypes.default;
+  const nodeStyle = nodeTypes[type] || nodeTypes.default;
+
+  const renderNodeContent = () => {
+    switch (data.type) {
+      case 'trigger':
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-sm font-medium">Gatilho</span>
+            <span className="text-xs text-muted-foreground">{data.label}</span>
+            {data.config?.triggerType && (
+              <span className="text-xs text-muted-foreground">
+                {data.config.triggerType === 'init' ? 'Início' : 'Fim'}
+              </span>
+            )}
+          </div>
+        );
+
+      case 'action':
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-sm font-medium">Ação</span>
+            <span className="text-xs text-muted-foreground">{data.label}</span>
+            {data.config?.actionType && (
+              <span className="text-xs text-muted-foreground">
+                {data.config.actionType === 'whatsapp' ? 'WhatsApp' : 'OpenAI'}
+              </span>
+            )}
+          </div>
+        );
+
+      case 'condition':
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-sm font-medium">Condição</span>
+            <span className="text-xs text-muted-foreground">{data.label}</span>
+            {data.config?.conditionConfig?.condition && (
+              <span className="text-xs text-muted-foreground">
+                {data.config.conditionConfig.condition}
+              </span>
+            )}
+          </div>
+        );
+
+      default:
+        return <span className="text-sm font-medium">{data.label}</span>;
+    }
+  };
 
   return (
     <>
@@ -77,19 +126,23 @@ export const CustomNode = ({ data, id, onDelete, onUpdate }: CustomNodeProps) =>
             <Pencil1Icon className="h-4 w-4" />
           </Button>
         </div>
-        <Card className="border-none shadow-none">
-          <div>
-            <Handle
-              type="target"
-              position={Position.Left}
-              className="w-3 h-3 !bg-primary"
-            />
-            <span className="text-sm font-medium">{data.label}</span>
-            <Handle
-              type="source"
-              position={Position.Right}
-              className="w-3 h-3 !bg-primary"
-            />
+        <Card className={`p-4 ${nodeStyle}`}>
+          <div className="flex items-center justify-between gap-2">
+            {data.type !== 'trigger' || (data.type === 'trigger' && data.config?.triggerType !== 'end') ? (
+              <Handle
+                type="target"
+                position={Position.Left}
+                className="w-3 h-3 !bg-primary"
+              />
+            ) : null}
+            {renderNodeContent()}
+            {data.type !== 'trigger' || (data.type === 'trigger' && data.config?.triggerType !== 'init') ? (
+              <Handle
+                type="source"
+                position={Position.Right}
+                className="w-3 h-3 !bg-primary"
+              />
+            ) : null}
           </div>
         </Card>
       </div>
@@ -110,12 +163,12 @@ export const CustomNode = ({ data, id, onDelete, onUpdate }: CustomNodeProps) =>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Tipo do nó</label>
-              <Select value={type} onValueChange={setType}>
+              <Select value={type} onValueChange={(value: NodeType) => setType(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="trigger">Trigger</SelectItem>
+                  <SelectItem value="trigger">Gatilho</SelectItem>
                   <SelectItem value="action">Ação</SelectItem>
                   <SelectItem value="condition">Condição</SelectItem>
                 </SelectContent>

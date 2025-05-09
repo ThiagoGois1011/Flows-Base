@@ -2,8 +2,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { FlowProvider } from "@/contexts/FlowContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useFlowStore } from "@/store/flowStore";
+import { useEffect } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,13 +15,18 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
+  const { fetchFlows } = useFlowStore()
+
+  useEffect(() => {
+    fetchFlows()
+  }, [])
+   
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
         <QueryClientProvider client={queryClient}>
-          <FlowProvider>
-            {children}
-          </FlowProvider>
+          {children}
         </QueryClientProvider>
       </body>
     </html>
