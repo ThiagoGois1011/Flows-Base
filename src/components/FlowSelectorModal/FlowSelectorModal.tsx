@@ -45,16 +45,8 @@ export default function FlowSelectorModal({ isOpen, onClose }: FlowSelectorModal
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[800px]">
-        <DialogHeader className="relative">
+        <DialogHeader>
           <DialogTitle>Selecione um Flow</DialogTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4 h-8 w-8 rounded-full hover:border hover:border-black/10"
-            onClick={onClose}
-          >
-            <Cross2Icon className="h-5 w-5" />
-          </Button>
         </DialogHeader>
 
         {isLoading ? (
@@ -78,11 +70,6 @@ export default function FlowSelectorModal({ isOpen, onClose }: FlowSelectorModal
                   <CardHeader>
                     <CardTitle className="text-lg">{flow.attributes.name}</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      {flow.attributes.description || "Sem descrição"}
-                    </p>
-                  </CardContent>
                 </Card>
               ))}
             </div>

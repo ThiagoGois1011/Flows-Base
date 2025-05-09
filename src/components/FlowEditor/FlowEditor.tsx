@@ -22,9 +22,42 @@ import FlowTopbar from "./FlowTopbar";
 import { ComponentItem } from "@/types";
 import { CustomNode } from "./nodes";
 
-interface FlowData {
-  edges: Edge[];
-  nodes: Node[];
+export interface FlowData {
+  id: number
+  attributes: Attributes
+}
+
+export interface Attributes {
+  name: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  billing: string
+  published: boolean
+  uid: any
+  data: Data
+}
+
+export interface Data {
+  edges: Edge[]
+  nodes: Node[]
+}
+
+export interface Node {
+  id: string
+  data: {
+    label: string
+    type: string
+  }
+  type: string
+  position: Position
+  sourcePosition?: Position
+  targetPosition?: Position
+}
+
+export interface Position {
+  x: number
+  y: number
 }
 
 interface FlowEditorProps {
@@ -44,15 +77,17 @@ const defaultEdgeOptions = {
 };
 
 export default function FlowEditor({ flow }: FlowEditorProps) {
-  const [nodes, setNodes] = useState<Node[]>(flow.nodes || []);
-  const [edges, setEdges] = useState<Edge[]>(flow.edges || []);
+  console.log(flow);
+  
+  const [nodes, setNodes] = useState<Node[]>(flow.attributes.data?.nodes || []);
+  const [edges, setEdges] = useState<Edge[]>(flow.attributes.data?.edges || []);
 
   useEffect(() => {
-    if (flow.nodes) {
-      setNodes(flow.nodes);
+    if (flow.attributes.data?.nodes) {
+      setNodes(flow.attributes.data.nodes);
     }
-    if (flow.edges) {
-      setEdges(flow.edges);
+    if (flow.attributes.data?.edges) {
+      setEdges(flow.attributes.data.edges);
     }
   }, [flow]);
 

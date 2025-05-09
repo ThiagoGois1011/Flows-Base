@@ -77,16 +77,8 @@ export default function FlowActions() {
 
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent>
-          <DialogHeader className="relative">
+          <DialogHeader>
             <DialogTitle>Criar Novo Flow</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4 h-8 w-8 rounded-full hover:border hover:border-black/10"
-              onClick={() => setIsCreateModalOpen(false)}
-            >
-              <Cross2Icon className="h-5 w-5" />
-            </Button>
           </DialogHeader>
           <div className="py-4">
             <Input
