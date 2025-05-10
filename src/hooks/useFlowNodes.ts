@@ -3,14 +3,29 @@ import { ComponentItem, Flow, FlowNode, NodeConfig, NodeType } from '@/types';
 import { Position } from 'reactflow';
 import { useFlowStore } from '@/store/flowStore';
 
-const getNodeLabel = (type: NodeType, config: NodeConfig): string => {
+export const getNodeLabel = (type: NodeType, config: NodeConfig): string => {
   switch (type) {
     case 'trigger':
       return config.type === 'init' ? 'Início' : 'Fim';
     case 'action':
+      if (config.type === 'whatsapp') {
+        return config.config?.action === 'receive_message' ? 'Receber Mensagem' : 'Enviar Mensagem';
+      }
+      if (config.type === 'openai') {
+        switch (config.config?.action) {
+          case 'create_assistant':
+            return 'Criar Assistente';
+          case 'text_response':
+            return 'Responder com Texto';
+          case 'audio_response':
+            return 'Responder com Áudio';
+          default:
+            return 'Ação OpenAI';
+        }
+      }
       return config.type || 'Ação';
     case 'condition':
-      return 'Condição';
+      return config.config?.condition || 'Condição';
     default:
       return 'Nó';
   }
@@ -29,8 +44,6 @@ export const useFlowNodes = () => {
   }, []);
 
   const handleCreateNode = useCallback(() => {
-    console.log(nodeConfig); 
-    console.log(selectedComponent); 
     if (!selectedComponent || !currentFlow) return;
     
     const newNode: FlowNode = {
@@ -91,5 +104,6 @@ export const useFlowNodes = () => {
     handleCreateNode,
     handleDeleteNode,
     handleUpdateNode,
+    getNodeLabel,
   };
 }; 

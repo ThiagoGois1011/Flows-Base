@@ -13,6 +13,7 @@ interface NodeConfigModalProps {
   currentStep: number;
   setCurrentStep: (step: number) => void;
   onNodeCreated: (nodeId: string, label: string) => void;
+  getNodeLabel: (type: string, config: NodeConfig) => string;
 }
 
 export const NodeConfigModal: React.FC<NodeConfigModalProps> = ({
@@ -24,49 +25,20 @@ export const NodeConfigModal: React.FC<NodeConfigModalProps> = ({
   currentStep,
   setCurrentStep,
   onNodeCreated,
+  getNodeLabel,
 }) => {
   const [shouldCreateNode, setShouldCreateNode] = React.useState(false);
 
   React.useEffect(() => {
     if (shouldCreateNode) {
       const nodeId = onCreateNode();
-      if (nodeId) {
-        const label = getNodeLabel(selectedComponent?.type, nodeConfig);
+      if (nodeId && selectedComponent?.type) {
+        const label = getNodeLabel(selectedComponent.type, nodeConfig);
         onNodeCreated(nodeId, label);
       }
       setShouldCreateNode(false);
     }
-  }, [nodeConfig, shouldCreateNode, onCreateNode, selectedComponent, onNodeCreated]);
-
-  const getNodeLabel = (type: string | undefined, config: NodeConfig): string => {
-    if (!type) return '';
-
-    switch (type) {
-      case 'trigger':
-        return config.type === 'init' ? 'Início do Fluxo' : 'Fim do Fluxo';
-      case 'action':
-        if (config.type === 'whatsapp') {
-          return config.config?.action === 'receive_message' ? 'Receber Mensagem' : 'Enviar Mensagem';
-        }
-        if (config.type === 'openai') {
-          switch (config.config?.action) {
-            case 'create_assistant':
-              return 'Criar Assistente';
-            case 'text_response':
-              return 'Responder com Texto';
-            case 'audio_response':
-              return 'Responder com Áudio';
-            default:
-              return 'Ação OpenAI';
-          }
-        }
-        return 'Ação';
-      case 'condition':
-        return config.config?.condition || 'Condição';
-      default:
-        return 'Nó';
-    }
-  };
+  }, [nodeConfig, shouldCreateNode, onCreateNode, selectedComponent, onNodeCreated, getNodeLabel]);
 
   if (!selectedComponent) return null;
 

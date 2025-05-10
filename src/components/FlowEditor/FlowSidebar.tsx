@@ -36,6 +36,7 @@ export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
     nodeConfig,
     setNodeConfig,
     handleCreateNode,
+    getNodeLabel,
   } = useFlowNodes();
 
   const getModalTitle = () => {
@@ -138,6 +139,7 @@ export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
               onNodeCreated={handleNodeCreated}
+              getNodeLabel={getNodeLabel}
             />
           </div>
         </DialogContent>
