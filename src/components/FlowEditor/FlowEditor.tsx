@@ -35,8 +35,6 @@ export default function FlowEditor() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [editingNodeLabel, setEditingNodeLabel] = useState("");
-  console.log(getNodes());
-  
 
   const handleNodeEdit = useCallback((nodeId: string, label: string) => {
     const currentNodes = getNodes();
@@ -111,7 +109,13 @@ export default function FlowEditor() {
   
   return (
     <div className="flex h-screen">
-      <FlowSidebar />
+      <FlowSidebar onNodeCreated={(nodeId, label) => {
+        setEditingNodeId(nodeId);
+        setEditingNodeLabel(label);
+        setIsEditDialogOpen(true);
+        console.log('nodeId, label');
+        
+      }} />
       <div className="flex-1">
         <FlowTopbar />
         <div className="h-[calc(100vh-48px)]">

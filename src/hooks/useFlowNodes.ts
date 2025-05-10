@@ -50,6 +50,8 @@ export const useFlowNodes = () => {
     setIsModalOpen(false);
     setSelectedComponent(null);
     setNodeConfig({});
+
+    return newNode.id;
   }, [selectedComponent, currentFlow, nodeConfig, getNodes, updateNodes]);
 
   const handleDeleteNode = useCallback((nodeId: string) => {

@@ -12,6 +12,7 @@ interface NodeConfigModalProps {
   onCreateNode: () => void;
   currentStep: number;
   setCurrentStep: (step: number) => void;
+  onNodeCreated: (nodeId: string, label: string) => void;
 }
 
 export const NodeConfigModal: React.FC<NodeConfigModalProps> = ({
@@ -22,15 +23,50 @@ export const NodeConfigModal: React.FC<NodeConfigModalProps> = ({
   onCreateNode,
   currentStep,
   setCurrentStep,
+  onNodeCreated,
 }) => {
   const [shouldCreateNode, setShouldCreateNode] = React.useState(false);
 
   React.useEffect(() => {
     if (shouldCreateNode) {
-      onCreateNode();
+      const nodeId = onCreateNode();
+      if (nodeId) {
+        const label = getNodeLabel(selectedComponent?.type, nodeConfig);
+        onNodeCreated(nodeId, label);
+      }
       setShouldCreateNode(false);
     }
-  }, [nodeConfig, shouldCreateNode, onCreateNode]);
+  }, [nodeConfig, shouldCreateNode, onCreateNode, selectedComponent, onNodeCreated]);
+
+  const getNodeLabel = (type: string | undefined, config: NodeConfig): string => {
+    if (!type) return '';
+
+    switch (type) {
+      case 'trigger':
+        return config.type === 'init' ? 'Início do Fluxo' : 'Fim do Fluxo';
+      case 'action':
+        if (config.type === 'whatsapp') {
+          return config.config?.action === 'receive_message' ? 'Receber Mensagem' : 'Enviar Mensagem';
+        }
+        if (config.type === 'openai') {
+          switch (config.config?.action) {
+            case 'create_assistant':
+              return 'Criar Assistente';
+            case 'text_response':
+              return 'Responder com Texto';
+            case 'audio_response':
+              return 'Responder com Áudio';
+            default:
+              return 'Ação OpenAI';
+          }
+        }
+        return 'Ação';
+      case 'condition':
+        return config.config?.condition || 'Condição';
+      default:
+        return 'Nó';
+    }
+  };
 
   if (!selectedComponent) return null;
 

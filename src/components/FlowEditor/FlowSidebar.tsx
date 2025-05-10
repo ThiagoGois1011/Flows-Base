@@ -21,7 +21,11 @@ import {
 } from "@/components/ui/dialog";
 import { NodeConfigModal } from "./FlowSidebar/NodeConfigModal";
 
-export default function FlowSidebar() {
+interface FlowSidebarProps {
+  onNodeCreated: (nodeId: string, label: string) => void;
+}
+
+export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
   const { currentFlow } = useFlowStore();
   const [currentStep, setCurrentStep] = React.useState(1);
   const {
@@ -91,6 +95,11 @@ export default function FlowSidebar() {
     setIsModalOpen(false);
   };
 
+  const handleNodeCreated = (nodeId: string, label: string) => {
+    onNodeCreated(nodeId, label);
+    handleClose();
+  };
+
   return (
     <>
       <Card className="w-[300px] min-h-screen rounded-none border-r shadow-none">
@@ -128,6 +137,7 @@ export default function FlowSidebar() {
               onCreateNode={handleCreateNode}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
+              onNodeCreated={handleNodeCreated}
             />
           </div>
         </DialogContent>
