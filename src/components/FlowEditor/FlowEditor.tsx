@@ -35,6 +35,8 @@ export default function FlowEditor() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [editingNodeLabel, setEditingNodeLabel] = useState("");
+  console.log(getNodes());
+  
 
   const handleNodeEdit = useCallback((nodeId: string, label: string) => {
     const currentNodes = getNodes();

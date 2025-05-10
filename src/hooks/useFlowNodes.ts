@@ -29,6 +29,8 @@ export const useFlowNodes = () => {
   }, []);
 
   const handleCreateNode = useCallback(() => {
+    console.log(nodeConfig); 
+    console.log(selectedComponent); 
     if (!selectedComponent || !currentFlow) return;
     
     const newNode: FlowNode = {
@@ -38,7 +40,7 @@ export const useFlowNodes = () => {
       data: {
         label: getNodeLabel(selectedComponent.type, nodeConfig),
         type: nodeConfig.type,
-        config: nodeConfig.config
+        config: nodeConfig.config || {}
       }
     };
 

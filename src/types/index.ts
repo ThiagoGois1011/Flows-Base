@@ -32,22 +32,16 @@ export interface FlowNode extends Node {
   targetPosition?: Position;
 }
 
-export type NodeType = 'trigger' | 'action' | 'condition';
+export type NodeType = 'init' | 'end' | 'whatsapp' | 'openai' | 'receive_message' | 'send_message';
 
 export interface NodeConfig {
-  triggerType?: 'init' | 'end';
-  actionType?: 'whatsapp' | 'openai';
-  whatsappAction?: 'receive_message' | 'send_message';
-  openaiConfig?: {
-    model: string;
-    database: 'redis' | 'mysql';
-    tool: 'create_assistant' | 'text_response' | 'audio_response';
-  };
-  conditionConfig?: {
-    condition: string;
-    truePath: string;
-    falsePath: string;
-  };
+  type: NodeType
+  config: {
+    action?: string;
+    model?: string;
+    database?: string;
+    condition?: string;
+  }
 }
 
 export interface ComponentItem {

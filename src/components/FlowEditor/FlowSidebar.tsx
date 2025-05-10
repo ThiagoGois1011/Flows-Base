@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { LightningBoltIcon, GearIcon, StopwatchIcon, GlobeIcon, MixerHorizontalIcon, PlusIcon } from "@radix-ui/react-icons";
+import { LightningBoltIcon, GearIcon, StopwatchIcon, GlobeIcon, MixerHorizontalIcon, PlusIcon, ArrowLeftIcon } from "@radix-ui/react-icons";
 import React from "react";
 import { DEFAULT_COMPONENTS } from "@/constants/components";
 import { FlowHeader } from "./FlowSidebar/FlowHeader";
@@ -23,6 +23,7 @@ import { NodeConfigModal } from "./FlowSidebar/NodeConfigModal";
 
 export default function FlowSidebar() {
   const { currentFlow } = useFlowStore();
+  const [currentStep, setCurrentStep] = React.useState(1);
   const {
     handleComponentClick,
     isModalOpen,
@@ -38,9 +39,18 @@ export default function FlowSidebar() {
       case 'trigger':
         return 'Criar Gatilho';
       case 'action':
+        if (currentStep === 1) {
+          return 'Selecione o tipo de ação';
+        }
+        if (nodeConfig.type === 'whatsapp') {
+          return 'Selecione a ação do WhatsApp';
+        }
+        if (nodeConfig.type === 'openai') {
+          return 'Selecione a ferramenta OpenAI';
+        }
         return 'Criar Ação';
       case 'condition':
-        return 'Criar Condição';
+        return 'Configure a condição';
       default:
         return 'Criar Nó';
     }
@@ -51,12 +61,34 @@ export default function FlowSidebar() {
       case 'trigger':
         return 'Adicione um gatilho para iniciar ou finalizar o fluxo';
       case 'action':
+        if (currentStep === 1) {
+          return 'Escolha o tipo de ação que deseja adicionar';
+        }
+        if (nodeConfig.type === 'whatsapp') {
+          return 'Escolha a ação do WhatsApp que deseja executar';
+        }
+        if (nodeConfig.type === 'openai') {
+          return 'Escolha a ferramenta OpenAI que deseja utilizar';
+        }
         return 'Adicione uma ação para executar no fluxo';
       case 'condition':
         return 'Adicione uma condição para controlar o fluxo';
       default:
         return 'Adicione um novo nó ao fluxo';
     }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    } else {
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleClose = () => {
+    setCurrentStep(1);
+    setIsModalOpen(false);
   };
 
   return (
@@ -74,27 +106,30 @@ export default function FlowSidebar() {
         </CardContent>
       </Card>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <Dialog open={isModalOpen} onOpenChange={handleClose}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{getModalTitle()}</DialogTitle>
-            <DialogDescription>{getModalDescription()}</DialogDescription>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={handleBack}>
+                <ArrowLeftIcon className="h-4 w-4" />
+              </Button>
+              <div>
+                <DialogTitle>{getModalTitle()}</DialogTitle>
+                <DialogDescription>{getModalDescription()}</DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
           <div className="py-4">
             <NodeConfigModal
               selectedComponent={selectedComponent}
               nodeConfig={nodeConfig}
               setNodeConfig={setNodeConfig}
+              onClose={handleClose}
+              onCreateNode={handleCreateNode}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
             />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleCreateNode}>
-              Criar
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
