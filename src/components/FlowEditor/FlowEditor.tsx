@@ -29,35 +29,37 @@ const defaultEdgeOptions = {
 };
 
 export default function FlowEditor() {
-  const { currentFlow } = useFlowStore();
+  const { currentFlow, getNodes, getEdges, updateNodes, updateEdges } = useFlowStore();
   const {
-    nodes,
-    setNodes,
-    edges,
-    setEdges,
     handleDeleteNode,
     handleUpdateNode,
   } = useFlowNodes();
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      setNodes((nds) => applyNodeChanges(changes, nds));
+      const currentNodes = getNodes();
+      const updatedNodes = applyNodeChanges(changes, currentNodes);
+      updateNodes(updatedNodes);
     },
-    [setNodes]
+    [getNodes, updateNodes]
   );
 
   const onEdgesChange = useCallback(
     (changes: any) => {
-      setEdges((eds) => applyEdgeChanges(changes, eds));
+      const currentEdges = getEdges();
+      const updatedEdges = applyEdgeChanges(changes, currentEdges);
+      updateEdges(updatedEdges);
     },
-    [setEdges]
+    [getEdges, updateEdges]
   );
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges((eds) => addEdge({ ...connection, ...defaultEdgeOptions }, eds));
+      const currentEdges = getEdges();
+      const newEdges = addEdge({ ...connection, ...defaultEdgeOptions }, currentEdges);
+      updateEdges(newEdges);
     },
-    [setEdges]
+    [getEdges, updateEdges]
   );
 
   const nodeTypes = useMemo(
@@ -89,8 +91,8 @@ export default function FlowEditor() {
         <FlowTopbar />
         <div className="h-[calc(100vh-48px)]">
           <ReactFlow
-            nodes={nodes}
-            edges={edges}
+            nodes={getNodes()}
+            edges={getEdges()}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}

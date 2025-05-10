@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { ComponentItem, Flow, FlowNode, NodeConfig, NodeType } from '@/types';
 import { Position } from 'reactflow';
 import { useFlowStore } from '@/store/flowStore';
@@ -17,19 +17,10 @@ const getNodeLabel = (type: NodeType, config: NodeConfig): string => {
 };
 
 export const useFlowNodes = () => {
-  const { currentFlow, updateFlow } = useFlowStore();
-  const [nodes, setNodes] = useState<FlowNode[]>([]);
-  const [edges, setEdges] = useState<any[]>([]);
+  const { currentFlow, updateNodes, updateEdges, getNodes, getEdges } = useFlowStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState<ComponentItem | null>(null);
   const [nodeConfig, setNodeConfig] = useState<NodeConfig>({});
-  
-  useEffect(() => {
-    if (currentFlow?.attributes?.data) {
-      setNodes(currentFlow.attributes.data.nodes || []);
-      setEdges(currentFlow.attributes.data.edges || []);
-    }
-  }, [currentFlow]);
 
   const handleComponentClick = useCallback((component: ComponentItem) => {
     setSelectedComponent(component);
@@ -51,75 +42,41 @@ export const useFlowNodes = () => {
       }
     };
 
-    setNodes(prevNodes => {
-      const newNodes = [...prevNodes, newNode];
-      updateFlow(currentFlow.id, {
-        attributes: {
-          ...currentFlow.attributes,
-          data: {
-            ...currentFlow.attributes.data,
-            nodes: newNodes,
-          },
-        },
-      });
-      return newNodes;
-    });
+    const currentNodes = getNodes();
+    updateNodes([...currentNodes, newNode]);
 
     setIsModalOpen(false);
     setSelectedComponent(null);
     setNodeConfig({});
-  }, [selectedComponent, currentFlow, nodeConfig, updateFlow]);
+  }, [selectedComponent, currentFlow, nodeConfig, getNodes, updateNodes]);
 
   const handleDeleteNode = useCallback((nodeId: string) => {
     if (!currentFlow) return;
 
-    setNodes(prevNodes => {
-      const newNodes = prevNodes.filter((node) => node.id !== nodeId);
-      setEdges(prevEdges => {
-        const newEdges = prevEdges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId);
-        updateFlow(currentFlow.id, {
-          attributes: {
-            ...currentFlow.attributes,
-            data: {
-              ...currentFlow.attributes.data,
-              nodes: newNodes,
-              edges: newEdges,
-            },
-          },
-        });
-        return newEdges;
-      });
-      return newNodes;
-    });
-  }, [currentFlow, updateFlow]);
+    const currentNodes = getNodes();
+    const currentEdges = getEdges();
+    
+    const newNodes = currentNodes.filter((node) => node.id !== nodeId);
+    const newEdges = currentEdges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId);
+    
+    updateNodes(newNodes);
+    updateEdges(newEdges);
+  }, [currentFlow, getNodes, getEdges, updateNodes, updateEdges]);
 
   const handleUpdateNode = useCallback((nodeId: string, data: { label: string; type: NodeType; config?: NodeConfig }) => {
     if (!currentFlow) return;
 
-    setNodes(prevNodes => {
-      const newNodes = prevNodes.map((node) =>
-        node.id === nodeId
-          ? { ...node, data: { ...node.data, ...data } }
-          : node
-      );
-      updateFlow(currentFlow.id, {
-        attributes: {
-          ...currentFlow.attributes,
-          data: {
-            ...currentFlow.attributes.data,
-            nodes: newNodes,
-          },
-        },
-      });
-      return newNodes;
-    });
-  }, [currentFlow, updateFlow]);
+    const currentNodes = getNodes();
+    const newNodes = currentNodes.map((node) =>
+      node.id === nodeId
+        ? { ...node, data: { ...node.data, ...data } }
+        : node
+    );
+    
+    updateNodes(newNodes);
+  }, [currentFlow, getNodes, updateNodes]);
 
   return {
-    nodes,
-    setNodes,
-    edges,
-    setEdges,
     isModalOpen,
     setIsModalOpen,
     selectedComponent,

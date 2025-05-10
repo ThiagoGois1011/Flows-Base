@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { Flow, FlowState } from '@/types';
+import { Flow, FlowNode, FlowState } from '@/types';
 import { getFlows, createFlow as createFlowApi, getFlowById } from '@/lib/api';
+import { Edge } from 'reactflow';
 
 interface FlowStore extends FlowState {
   currentFlow: Flow | null;
@@ -8,6 +9,10 @@ interface FlowStore extends FlowState {
   createFlow: (name: string) => Promise<void>;
   setCurrentFlow: (flowId: string) => Promise<void>;
   updateFlow: (flowId: string, data: Partial<Flow>) => void;
+  getNodes: () => FlowNode[];
+  getEdges: () => Edge[];
+  updateNodes: (nodes: FlowNode[]) => void;
+  updateEdges: (edges: Edge[]) => void;
 }
 
 export const useFlowStore = create<FlowStore>((set, get) => ({
@@ -16,6 +21,45 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   currentFlow: null,
   isLoading: false,
   error: null,
+
+  getNodes: () => get().currentFlow?.attributes.data.nodes || [],
+  getEdges: () => get().currentFlow?.attributes.data.edges || [],
+
+  updateNodes: (nodes: FlowNode[]) => {
+    const currentFlow = get().currentFlow;
+    if (!currentFlow) return;
+
+    set((state) => ({
+      currentFlow: {
+        ...state.currentFlow!,
+        attributes: {
+          ...state.currentFlow!.attributes,
+          data: {
+            ...state.currentFlow!.attributes.data,
+            nodes,
+          },
+        },
+      },
+    }));
+  },
+
+  updateEdges: (edges: Edge[]) => {
+    const currentFlow = get().currentFlow;
+    if (!currentFlow) return;
+
+    set((state) => ({
+      currentFlow: {
+        ...state.currentFlow!,
+        attributes: {
+          ...state.currentFlow!.attributes,
+          data: {
+            ...state.currentFlow!.attributes.data,
+            edges,
+          },
+        },
+      },
+    }));
+  },
 
   fetchFlows: async () => {
     set({ isLoading: true, error: null });
