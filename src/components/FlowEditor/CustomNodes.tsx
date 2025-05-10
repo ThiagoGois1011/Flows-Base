@@ -7,7 +7,7 @@ export function TriggerNode(props: NodeProps) {
   return (
     <div className="rounded-full border-2 border-yellow-400 bg-yellow-100 px-6 py-4 flex flex-col items-center shadow-md">
       <Badge className="bg-yellow-400 text-yellow-900 mb-1"><LightningBoltIcon className="mr-1" /> Gatilho</Badge>
-      <span className="font-bold">Início</span>
+      <span className="font-bold">{props.data?.label || "Início"}</span>
       <Handle type="source" position={Position.Right} />
     </div>
   );

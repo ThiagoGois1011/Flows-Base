@@ -128,7 +128,7 @@ export const CustomNode = ({ data, id, onDelete, onUpdate }: CustomNodeProps) =>
         </div>
         <Card className={`p-4 ${nodeStyle}`}>
           <div className="flex items-center justify-between gap-2">
-            {data.type !== 'trigger' || (data.type === 'trigger' && data.config?.triggerType !== 'end') ? (
+            {data.type !== 'trigger' || (data.type === 'trigger' && data.config?.triggerType === 'init') ? (
               <Handle
                 type="target"
                 position={Position.Left}
@@ -136,7 +136,7 @@ export const CustomNode = ({ data, id, onDelete, onUpdate }: CustomNodeProps) =>
               />
             ) : null}
             {renderNodeContent()}
-            {data.type !== 'trigger' || (data.type === 'trigger' && data.config?.triggerType !== 'init') ? (
+            {data.type !== 'trigger' || (data.type === 'trigger' && data.config?.triggerType === 'init') ? (
               <Handle
                 type="source"
                 position={Position.Right}
