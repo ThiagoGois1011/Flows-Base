@@ -3,6 +3,19 @@ import { ComponentItem, Flow, FlowNode, NodeConfig, NodeType } from '@/types';
 import { Position } from 'reactflow';
 import { useFlowStore } from '@/store/flowStore';
 
+const getNodeLabel = (type: NodeType, config: NodeConfig): string => {
+  switch (type) {
+    case 'trigger':
+      return config.type === 'init' ? 'Início' : 'Fim';
+    case 'action':
+      return config.type || 'Ação';
+    case 'condition':
+      return 'Condição';
+    default:
+      return 'Nó';
+  }
+};
+
 export const useFlowNodes = () => {
   const { currentFlow, updateFlow } = useFlowStore();
   const [nodes, setNodes] = useState<FlowNode[]>([]);
@@ -10,7 +23,7 @@ export const useFlowNodes = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState<ComponentItem | null>(null);
   const [nodeConfig, setNodeConfig] = useState<NodeConfig>({});
-
+  
   useEffect(() => {
     if (currentFlow?.attributes?.data) {
       setNodes(currentFlow.attributes.data.nodes || []);
@@ -26,29 +39,17 @@ export const useFlowNodes = () => {
 
   const handleCreateNode = useCallback(() => {
     if (!selectedComponent || !currentFlow) return;
-    console.log(selectedComponent);
-    console.log(nodeConfig);
-    
     
     const newNode: FlowNode = {
       id: `${selectedComponent.id}-${Date.now()}`,
       type: selectedComponent.type,
       position: { x: 100, y: 100 },
       data: {
-        label: selectedComponent.type === 'trigger' 
-          ? (nodeConfig.triggerType === 'init' ? 'Início' : 'Fim')
-          : selectedComponent.name,
-        type: selectedComponent.type,
-        config: nodeConfig
-      },
-      sourcePosition: selectedComponent.type === 'trigger' && nodeConfig.triggerType === 'init' ? Position.Right : undefined,
-      targetPosition: selectedComponent.type === 'trigger' && nodeConfig.triggerType === 'end' ? Position.Left : undefined,
+        label: getNodeLabel(selectedComponent.type, nodeConfig),
+        type: nodeConfig.type,
+        config: nodeConfig.config
+      }
     };
-
-    if (selectedComponent.type === 'condition') {
-      newNode.sourcePosition = Position.Right;
-      newNode.targetPosition = Position.Left;
-    }
 
     setNodes(prevNodes => {
       const newNodes = [...prevNodes, newNode];
