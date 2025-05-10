@@ -22,19 +22,24 @@ import {
 import { NodeConfigModal } from "./FlowSidebar/NodeConfigModal";
 
 interface FlowSidebarProps {
-  onNodeCreated: (nodeId: string, label: string) => void;
+  onNodeCreated: (nodeId: string, label: string, type: string, data: any) => void;
 }
 
 export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
-  const { currentFlow } = useFlowStore();
-  const [currentStep, setCurrentStep] = React.useState(1);
-  const {
-    handleComponentClick,
+  const { 
+    currentFlow, 
+    currentStep, 
+    setCurrentStep,
     isModalOpen,
-    setIsModalOpen,
     selectedComponent,
     nodeConfig,
-    setNodeConfig,
+    setModalOpen,
+    setSelectedComponent,
+    setNodeConfig
+  } = useFlowStore();
+
+  const {
+    handleComponentClick,
     handleCreateNode,
     getNodeLabel,
   } = useFlowNodes();
@@ -87,17 +92,17 @@ export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      setIsModalOpen(false);
+      setModalOpen(false);
     }
   };
 
   const handleClose = () => {
     setCurrentStep(1);
-    setIsModalOpen(false);
+    setModalOpen(false);
   };
 
-  const handleNodeCreated = (nodeId: string, label: string) => {
-    onNodeCreated(nodeId, label);
+  const handleNodeCreated = (nodeId: string, label: string, type: string, data: any) => {
+    onNodeCreated(nodeId, label, type, data);
     handleClose();
   };
 

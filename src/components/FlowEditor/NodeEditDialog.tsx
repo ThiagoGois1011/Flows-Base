@@ -5,33 +5,98 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { TriggerForm, ConditionForm, WebhookForm, ActionForm } from "./NodeTypeForms";
 
 interface NodeEditDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   nodeId: string | null;
   initialLabel: string;
-  onSave: (nodeId: string, label: string) => void;
+  nodeType: string;
+  initialData?: any;
+  onSave: (nodeId: string, data: any) => void;
 }
 
-export function NodeEditDialog({ isOpen, onOpenChange, nodeId, initialLabel, onSave }: NodeEditDialogProps) {
+export function NodeEditDialog({
+  isOpen,
+  onOpenChange,
+  nodeId,
+  initialLabel,
+  nodeType,
+  initialData = {},
+  onSave,
+}: NodeEditDialogProps) {
+  const [formData, setFormData] = useState(initialData);
   const [label, setLabel] = useState(initialLabel);
 
   useEffect(() => {
     if (isOpen) {
+      setFormData(initialData);
       setLabel(initialLabel);
     }
-  }, [isOpen, initialLabel]);
-
-  const handleSave = () => {
+  }, [isOpen, initialData, initialLabel]);
+  
+  const handleSave = useCallback(() => {
     if (nodeId) {
-      onSave(nodeId, label);
+      onSave(nodeId, { ...formData, label: label });
       onOpenChange(false);
     }
-  };
+  }, [nodeId, label, formData, onSave, onOpenChange]);
+
+  const handleLabelChange = useCallback((value: string) => {
+    setLabel(value);
+    console.log("rodando");
+    
+  }, []);
+
+  const handleFormDataChange = useCallback((newData: any) => {
+    setFormData(prevData => ({ ...prevData, ...newData }));
+  }, []);
+
+  const renderForm = useCallback(() => {
+    switch (nodeType) {
+      case "trigger":
+        return <TriggerForm label={label} onLabelChange={handleLabelChange} />;
+      case "condition":
+        return (
+          <ConditionForm
+            label={label}
+            onLabelChange={handleLabelChange}
+            firstValue={formData.firstValue || ""}
+            operator={formData.operator || ""}
+            secondValue={formData.secondValue || ""}
+            onFirstValueChange={(value) => handleFormDataChange({ firstValue: value })}
+            onOperatorChange={(value) => handleFormDataChange({ operator: value })}
+            onSecondValueChange={(value) => handleFormDataChange({ secondValue: value })}
+          />
+        );
+      case "webhook":
+        return (
+          <WebhookForm
+            label={label}
+            onLabelChange={handleLabelChange}
+            url={formData.url || ""}
+            params={formData.params || []}
+            onUrlChange={(value) => handleFormDataChange({ url: value })}
+            onParamsChange={(params) => handleFormDataChange({ params })}
+          />
+        );
+      case "action":
+        return (
+          <ActionForm
+            label={label}
+            onLabelChange={handleLabelChange}
+            type={formData.type || ""}
+            config={formData.config || {}}
+            onConfigChange={(config) => handleFormDataChange({ config })}
+          />
+        );
+      default:
+        return null;
+    }
+  }, [nodeType, label, formData, handleLabelChange, handleFormDataChange]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -40,14 +105,7 @@ export function NodeEditDialog({ isOpen, onOpenChange, nodeId, initialLabel, onS
           <DialogTitle>Editar Nó</DialogTitle>
         </DialogHeader>
         <div className="py-4 space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Nome do nó</label>
-            <Input
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="Nome do nó"
-            />
-          </div>
+          {renderForm()}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

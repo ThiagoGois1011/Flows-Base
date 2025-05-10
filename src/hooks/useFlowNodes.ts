@@ -32,16 +32,25 @@ export const getNodeLabel = (type: NodeType, config: NodeConfig): string => {
 };
 
 export const useFlowNodes = () => {
-  const { currentFlow, updateNodes, updateEdges, getNodes, getEdges } = useFlowStore();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedComponent, setSelectedComponent] = useState<ComponentItem | null>(null);
-  const [nodeConfig, setNodeConfig] = useState<NodeConfig>({});
+  const { 
+    currentFlow, 
+    updateNodes, 
+    updateEdges, 
+    getNodes, 
+    getEdges,
+    isModalOpen,
+    selectedComponent,
+    nodeConfig,
+    setModalOpen,
+    setSelectedComponent,
+    setNodeConfig
+  } = useFlowStore();
 
   const handleComponentClick = useCallback((component: ComponentItem) => {
     setSelectedComponent(component);
     setNodeConfig({});
-    setIsModalOpen(true);
-  }, []);
+    setModalOpen(true);
+  }, [setSelectedComponent, setNodeConfig, setModalOpen]);
 
   const handleCreateNode = useCallback(() => {
     if (!selectedComponent || !currentFlow) return;
@@ -60,12 +69,12 @@ export const useFlowNodes = () => {
     const currentNodes = getNodes();
     updateNodes([...currentNodes, newNode]);
 
-    setIsModalOpen(false);
+    setModalOpen(false);
     setSelectedComponent(null);
     setNodeConfig({});
 
     return newNode.id;
-  }, [selectedComponent, currentFlow, nodeConfig, getNodes, updateNodes]);
+  }, [selectedComponent, currentFlow, nodeConfig, getNodes, updateNodes, setModalOpen, setSelectedComponent, setNodeConfig]);
 
   const handleDeleteNode = useCallback((nodeId: string) => {
     if (!currentFlow) return;
@@ -94,12 +103,6 @@ export const useFlowNodes = () => {
   }, [currentFlow, getNodes, updateNodes]);
 
   return {
-    isModalOpen,
-    setIsModalOpen,
-    selectedComponent,
-    setSelectedComponent,
-    nodeConfig,
-    setNodeConfig,
     handleComponentClick,
     handleCreateNode,
     handleDeleteNode,

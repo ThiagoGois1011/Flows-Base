@@ -31,26 +31,41 @@ const defaultEdgeOptions = {
 };
 
 export default function FlowEditor() {
-  const { currentFlow, getNodes, getEdges, updateNodes, updateEdges } = useFlowStore();
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
-  const [editingNodeLabel, setEditingNodeLabel] = useState("");
-
-  const handleNodeEdit = useCallback((nodeId: string, label: string) => {
+  const { 
+    currentFlow, 
+    getNodes, 
+    getEdges, 
+    updateNodes, 
+    updateEdges,
+    isEditDialogOpen,
+    editingNodeId,
+    editingNodeLabel,
+    editingNodeType,
+    editingNodeData,
+    setEditDialogOpen,
+    setEditingNode
+  } = useFlowStore();
+  console.log(getNodes());
+  const handleNodeEdit = useCallback((nodeId: string, data: any) => {
+    console.log(data);
+    
     const currentNodes = getNodes();
+    
     const newNodes = currentNodes.map((node) =>
       node.id === nodeId
-        ? { ...node, data: { ...node.data, label } }
+        ? { ...node, data: { ...node.data, ...data } }
         : node
     );
     updateNodes(newNodes);
   }, [getNodes, updateNodes]);
 
   const handleEditClick = useCallback((nodeId: string, label: string) => {
-    setEditingNodeId(nodeId);
-    setEditingNodeLabel(label);
-    setIsEditDialogOpen(true);
-  }, []);
+    const node = getNodes().find(n => n.id === nodeId);
+    if (node) {
+      setEditingNode(nodeId, label, node.type, node.data);
+      setEditDialogOpen(true);
+    }
+  }, [getNodes, setEditingNode, setEditDialogOpen]);
 
   const handleEdgeDelete = useCallback((edgeId: string) => {
     const currentEdges = getEdges();
@@ -109,12 +124,9 @@ export default function FlowEditor() {
   
   return (
     <div className="flex h-screen">
-      <FlowSidebar onNodeCreated={(nodeId, label) => {
-        setEditingNodeId(nodeId);
-        setEditingNodeLabel(label);
-        setIsEditDialogOpen(true);
-        console.log('nodeId, label');
-        
+      <FlowSidebar onNodeCreated={(nodeId, label, type, data) => {
+        setEditingNode(nodeId, label, type, data);
+        setEditDialogOpen(true);
       }} />
       <div className="flex-1">
         <FlowTopbar />
@@ -139,9 +151,11 @@ export default function FlowEditor() {
 
       <NodeEditDialog
         isOpen={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
+        onOpenChange={setEditDialogOpen}
         nodeId={editingNodeId}
         initialLabel={editingNodeLabel}
+        nodeType={editingNodeType}
+        initialData={editingNodeData}
         onSave={handleNodeEdit}
       />
     </div>

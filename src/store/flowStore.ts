@@ -5,6 +5,16 @@ import { Edge } from 'reactflow';
 
 interface FlowStore extends FlowState {
   currentFlow: Flow | null;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  // Estados de edição do nó
+  isEditDialogOpen: boolean;
+  editingNodeId: string | null;
+  editingNodeLabel: string;
+  editingNodeType: string;
+  editingNodeData: any;
+  setEditDialogOpen: (open: boolean) => void;
+  setEditingNode: (nodeId: string | null, label: string, type: string, data: any) => void;
   fetchFlows: () => Promise<void>;
   createFlow: (name: string) => Promise<void>;
   setCurrentFlow: (flowId: string) => Promise<void>;
@@ -13,14 +23,32 @@ interface FlowStore extends FlowState {
   getEdges: () => Edge[];
   updateNodes: (nodes: FlowNode[]) => void;
   updateEdges: (edges: Edge[]) => void;
+  // Estados do modal e configuração
+  isModalOpen: boolean;
+  selectedComponent: ComponentItem | null;
+  nodeConfig: NodeConfig;
+  setModalOpen: (open: boolean) => void;
+  setSelectedComponent: (component: ComponentItem | null) => void;
+  setNodeConfig: (config: NodeConfig) => void;
 }
 
 export const useFlowStore = create<FlowStore>((set, get) => ({
   flows: [],
   selectedFlow: null,
   currentFlow: null,
+  currentStep: 1,
   isLoading: false,
   error: null,
+  isEditDialogOpen: false,
+  editingNodeId: null,
+  editingNodeLabel: "",
+  editingNodeType: "",
+  editingNodeData: {},
+  isModalOpen: false,
+  selectedComponent: null,
+  nodeConfig: {},
+
+  setCurrentStep: (step: number) => set({ currentStep: step }),
 
   getNodes: () => get().currentFlow?.attributes.data.nodes || [],
   getEdges: () => get().currentFlow?.attributes.data.edges || [],
@@ -106,4 +134,18 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
         : state.currentFlow,
     }));
   },
+
+  setEditDialogOpen: (open: boolean) => set({ isEditDialogOpen: open }),
+  
+  setEditingNode: (nodeId: string | null, label: string, type: string, data: any) => 
+    set({ 
+      editingNodeId: nodeId,
+      editingNodeLabel: label,
+      editingNodeType: type,
+      editingNodeData: data
+    }),
+
+  setModalOpen: (open: boolean) => set({ isModalOpen: open }),
+  setSelectedComponent: (component: ComponentItem | null) => set({ selectedComponent: component }),
+  setNodeConfig: (config: NodeConfig) => set({ nodeConfig: config }),
 })); 
