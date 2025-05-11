@@ -65,6 +65,22 @@ export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
     getNodeLabel,
   } = useFlowNodes();
 
+  const handleComponentClickWrapper = (component: ComponentItem) => {
+    const directCreateComponents = ['delay', 'condition', 'webhook'];
+    
+    if (directCreateComponents.includes(component.type)) {
+      setSelectedComponent(component);
+      const nodeId = handleCreateNode(component);
+      if (nodeId) {
+        const label = getNodeLabel(component.type, { type: component.type });
+        onNodeCreated(nodeId, label, component.type, { type: component.type });
+      }
+      return;
+    }
+
+    handleComponentClick(component);
+  };
+
   const getModalTitle = () => {
     switch (selectedComponent?.type) {
       case 'trigger':
@@ -201,7 +217,7 @@ export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
           <Separator />
           <ComponentList
             components={DEFAULT_COMPONENTS}
-            onComponentClick={handleComponentClick}
+            onComponentClick={handleComponentClickWrapper}
           />
         </CardContent>
       </Card>

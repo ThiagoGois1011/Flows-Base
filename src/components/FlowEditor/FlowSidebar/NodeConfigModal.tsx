@@ -20,7 +20,7 @@ interface NodeConfigModalProps {
   nodeConfig: NodeConfig;
   setNodeConfig: (config: NodeConfig) => void;
   onClose: () => void;
-  onCreateNode: () => void;
+  onCreateNode: (component: ComponentItem) => string;
   currentStep: number;
   setCurrentStep: (step: number) => void;
   onNodeCreated: (nodeId: string, label: string, type: string, data: any) => void;
@@ -41,9 +41,9 @@ export const NodeConfigModal: React.FC<NodeConfigModalProps> = ({
   const [shouldCreateNode, setShouldCreateNode] = React.useState(false);
 
   React.useEffect(() => {
-    if (shouldCreateNode) {
-      const nodeId = onCreateNode();
-      if (nodeId && selectedComponent?.type) {
+    if (shouldCreateNode && selectedComponent) {
+      const nodeId = onCreateNode(selectedComponent);
+      if (nodeId) {
         const label = getNodeLabel(selectedComponent.type, nodeConfig);
         onNodeCreated(nodeId, label, selectedComponent.type, nodeConfig);
       }

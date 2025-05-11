@@ -39,7 +39,6 @@ export const useFlowNodes = () => {
     getNodes, 
     getEdges,
     isModalOpen,
-    selectedComponent,
     nodeConfig,
     setModalOpen,
     setSelectedComponent,
@@ -52,15 +51,15 @@ export const useFlowNodes = () => {
     setModalOpen(true);
   }, [setSelectedComponent, setNodeConfig, setModalOpen]);
 
-  const handleCreateNode = useCallback(() => {
-    if (!selectedComponent || !currentFlow) return;
+  const handleCreateNode = useCallback((component: ComponentItem) => {
+    if (!currentFlow) return;
     
     const newNode: FlowNode = {
-      id: `${selectedComponent.id}-${Date.now()}`,
-      type: selectedComponent.type,
+      id: `${component.id}-${Date.now()}`,
+      type: component.type,
       position: { x: 100, y: 100 },
       data: {
-        label: getNodeLabel(selectedComponent.type, nodeConfig),
+        label: getNodeLabel(component.type, nodeConfig),
         type: nodeConfig.type,
         config: nodeConfig.config || {}
       }
@@ -74,7 +73,7 @@ export const useFlowNodes = () => {
     setNodeConfig({});
 
     return newNode.id;
-  }, [selectedComponent, currentFlow, nodeConfig, getNodes, updateNodes, setModalOpen, setSelectedComponent, setNodeConfig]);
+  }, [currentFlow, nodeConfig, getNodes, updateNodes, setModalOpen, setSelectedComponent, setNodeConfig]);
 
   const handleDeleteNode = useCallback((nodeId: string) => {
     if (!currentFlow) return;

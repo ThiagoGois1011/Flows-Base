@@ -45,7 +45,12 @@ export default function FlowEditor() {
     setEditDialogOpen,
     setEditingNode
   } = useFlowStore();
-  console.log(getNodes());
+
+  const {
+    handleCreateNode,
+    getNodeLabel,
+  } = useFlowNodes();
+
   const handleNodeEdit = useCallback((nodeId: string, data: any) => {
     console.log(data);
     
@@ -157,6 +162,7 @@ export default function FlowEditor() {
         nodeType={editingNodeType}
         initialData={editingNodeData}
         onSave={handleNodeEdit}
+        onCreateNode={handleCreateNode}
       />
     </div>
   );
