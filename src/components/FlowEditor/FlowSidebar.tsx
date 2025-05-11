@@ -110,6 +110,10 @@ export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
         return 'Criar Ação';
       case 'condition':
         return 'Configure a condição';
+      case 'delay':
+        return 'Configure o atraso';
+      case 'webhook':
+        return 'Configure o webhook';
       default:
         return 'Criar Nó';
     }
@@ -159,58 +163,6 @@ export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
   const handleNodeCreated = (nodeId: string, label: string, type: string, data: any) => {
     onNodeCreated(nodeId, label, type, data);
     handleClose();
-  };
-
-  const renderOpenAIConfig = () => {
-    if (currentStep === 2) {
-      return (
-        <div className="grid grid-cols-1 gap-4">
-          {OPENAI_MODELS.map((model) => (
-            <Button
-              key={model.id}
-              variant="outline"
-              className="flex items-center justify-start gap-2 h-auto p-4"
-              onClick={() => {
-                setNodeConfig({ ...nodeConfig, model: model.id });
-                setCurrentStep(3);
-              }}
-            >
-              <LayersIcon className="h-5 w-5" />
-              <div className="flex flex-col items-start">
-                <span className="font-medium">{model.name}</span>
-                <span className="text-sm text-muted-foreground">{model.description}</span>
-              </div>
-            </Button>
-          ))}
-        </div>
-      );
-    }
-
-    if (currentStep === 3) {
-      return (
-        <div className="grid grid-cols-1 gap-4">
-          {DATABASE_OPTIONS.map((db) => (
-            <Button
-              key={db.id}
-              variant="outline"
-              className="flex items-center justify-start gap-2 h-auto p-4"
-              onClick={() => {
-                setNodeConfig({ ...nodeConfig, database: db.id });
-                setCurrentStep(4);
-              }}
-            >
-              <StackIcon className="h-5 w-5" />
-              <div className="flex flex-col items-start">
-                <span className="font-medium">{db.name}</span>
-                <span className="text-sm text-muted-foreground">{db.description}</span>
-              </div>
-            </Button>
-          ))}
-        </div>
-      );
-    }
-
-    return null;
   };
 
   return (

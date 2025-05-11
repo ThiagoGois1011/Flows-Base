@@ -101,10 +101,22 @@ export default function FlowEditor() {
   const onConnect = useCallback(
     (connection: any) => {
       const currentEdges = getEdges();
-      const newEdges = addEdge(connection, currentEdges);
+      const sourceNode = getNodes().find(node => node.id === connection.source);
+      
+      let edgeData = {};
+      if (sourceNode?.type === 'condition') {
+        edgeData = {
+          condition: connection.sourceHandle === 'true' ? 'true' : 'false'
+        };
+      }
+      
+      const newEdges = addEdge({
+        ...connection,
+        data: edgeData
+      }, currentEdges);
       updateEdges(newEdges);
     },
-    [getEdges, updateEdges]
+    [getEdges, getNodes, updateEdges]
   );
 
   const nodeTypes = useMemo(
@@ -124,6 +136,17 @@ export default function FlowEditor() {
     }),
     [handleEdgeDelete]
   );
+
+  const getPreviousNode = useCallback((nodeId: string) => {
+    const edges = getEdges();
+    const nodes = getNodes();
+    
+    const incomingEdge = edges.find(edge => edge.target === nodeId);
+    if (!incomingEdge) return null;
+    
+    const previousNode = nodes.find(node => node.id === incomingEdge.source);
+    return previousNode || null;
+  }, [getEdges, getNodes]);
 
   if (!currentFlow) {
     return <div>Carregando...</div>;
@@ -168,6 +191,7 @@ export default function FlowEditor() {
         onSave={handleNodeEdit}
         onCreateNode={handleCreateNode}
         onEditClick={handleEditClick}
+        previousNode={editingNodeId ? getPreviousNode(editingNodeId) : null}
       />
     </div>
   );

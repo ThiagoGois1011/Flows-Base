@@ -67,7 +67,9 @@ export const useFlowNodes = () => {
       data: {
         label: getNodeLabel(component.type, configToUse),
         type: configToUse.type || '',
-        config: configToUse.config || {}
+        config: configToUse.config || {},
+        input: '',
+        output: ''
       }
     };
 

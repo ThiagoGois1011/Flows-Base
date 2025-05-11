@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { LightningBoltIcon, GearIcon, MixerHorizontalIcon, StopwatchIcon, GlobeIcon, TrashIcon, Pencil1Icon } from "@radix-ui/react-icons";
+import { LightningBoltIcon, GearIcon, MixerHorizontalIcon, StopwatchIcon, GlobeIcon, TrashIcon, Pencil1Icon, ChatBubbleIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Handle, Position, NodeProps } from "reactflow";
 import { Button } from "@/components/ui/button";
 import {
@@ -288,7 +288,19 @@ export function ActionNode(props: NodeProps) {
         }`}
       >
         <Badge className={`${style.badge} ${style.text} mb-1`}>
-          <GearIcon className="mr-1" /> Ação
+          {props.data?.type === 'whatsapp' ? (
+            <>
+              <ChatBubbleIcon className="mr-1" /> WhatsApp
+            </>
+          ) : props.data?.type === 'openai' ? (
+            <>
+              <RocketIcon className="mr-1" /> OpenAI
+            </>
+          ) : (
+            <>
+              <GearIcon className="mr-1" /> Ação
+            </>
+          )}
         </Badge>
         <span className="font-bold">{props.data?.label || 'Ação'}</span>
         <Handle type="target" position={Position.Left} />
@@ -365,8 +377,18 @@ export function ConditionNode(props: NodeProps) {
         </Badge>
         <span className="font-bold">{props.data?.label || 'Condição'}</span>
         <Handle type="target" position={Position.Left} />
-        <Handle type="source" position={Position.Right} id="true" />
-        <Handle type="source" position={Position.Right} id="false" style={{ top: '70%' }} />
+        <Handle 
+          type="source" 
+          position={Position.Right} 
+          id="true"
+          style={{ top: '30%' }}
+        />
+        <Handle 
+          type="source" 
+          position={Position.Right} 
+          id="false"
+          style={{ top: '70%' }}
+        />
       </div>
     </div>
   );

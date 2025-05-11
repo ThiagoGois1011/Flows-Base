@@ -15,9 +15,11 @@ interface ConditionFormProps extends BaseFormProps {
   firstValue: string;
   operator: string;
   secondValue: string;
+  firstValueType: 'input' | 'value';
   onFirstValueChange: (value: string) => void;
   onOperatorChange: (value: string) => void;
   onSecondValueChange: (value: string) => void;
+  onFirstValueTypeChange: (value: 'input' | 'value') => void;
 }
 
 interface WebhookFormProps extends BaseFormProps {
@@ -71,9 +73,11 @@ export const ConditionForm: React.FC<ConditionFormProps> = ({
   firstValue,
   operator,
   secondValue,
+  firstValueType,
   onFirstValueChange,
   onOperatorChange,
   onSecondValueChange,
+  onFirstValueTypeChange,
 }) => {
   const [localFirstValue, setLocalFirstValue] = React.useState(firstValue);
   const [localSecondValue, setLocalSecondValue] = React.useState(secondValue);
@@ -106,13 +110,30 @@ export const ConditionForm: React.FC<ConditionFormProps> = ({
         />
       </div>
       <div className="space-y-2">
-        <Label>Primeiro Valor</Label>
-        <Input
-          value={localFirstValue}
-          onChange={handleFirstValueChange}
-          placeholder="Primeiro valor"
-        />
+        <Label>Tipo do Primeiro Valor</Label>
+        <Select 
+          value={firstValueType} 
+          onValueChange={onFirstValueTypeChange}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="input">Input do Node Anterior</SelectItem>
+            <SelectItem value="value">Valor Fixo</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+      {firstValueType === 'value' && (
+        <div className="space-y-2">
+          <Label>Primeiro Valor</Label>
+          <Input
+            value={localFirstValue}
+            onChange={handleFirstValueChange}
+            placeholder="Primeiro valor"
+          />
+        </div>
+      )}
       <div className="space-y-2">
         <Label>Operador</Label>
         <Select value={operator} onValueChange={onOperatorChange}>

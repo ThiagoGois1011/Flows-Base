@@ -18,6 +18,7 @@ interface NodeEditDialogProps {
   initialData?: any;
   onSave: (nodeId: string, data: any) => void;
   onEditClick?: (nodeId: string, label: string) => void;
+  previousNode?: any | null;
 }
 
 export function NodeEditDialog({
@@ -29,6 +30,7 @@ export function NodeEditDialog({
   initialData = {},
   onSave,
   onEditClick,
+  previousNode,
 }: NodeEditDialogProps) {
   const [formData, setFormData] = useState(initialData);
   const [label, setLabel] = useState(initialLabel);
@@ -87,9 +89,11 @@ export function NodeEditDialog({
             firstValue={formData.firstValue || ""}
             operator={formData.operator || ""}
             secondValue={formData.secondValue || ""}
+            firstValueType={formData.firstValueType || "value"}
             onFirstValueChange={(value) => handleFormDataChange({ firstValue: value })}
             onOperatorChange={(value) => handleFormDataChange({ operator: value })}
             onSecondValueChange={(value) => handleFormDataChange({ secondValue: value })}
+            onFirstValueTypeChange={(value) => handleFormDataChange({ firstValueType: value })}
           />
         );
       case "webhook":
@@ -137,6 +141,28 @@ export function NodeEditDialog({
         </DialogHeader>
         <div className="py-4 space-y-4">
           {renderForm()}
+          
+          <div className="border-t pt-4 mt-4">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium mb-2">Input</h3>
+                <div className="bg-muted p-3 rounded-md">
+                  {previousNode ? (
+                    <p className="text-sm">Node anterior: {previousNode.data.label || previousNode.id}</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nenhum node anterior conectado</p>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium mb-2">Output</h3>
+                <div className="bg-muted p-3 rounded-md">
+                  <p className="text-sm text-muted-foreground">Execute o flow para ver o output.</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

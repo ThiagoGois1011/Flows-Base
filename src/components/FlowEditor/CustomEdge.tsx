@@ -14,6 +14,7 @@ export function CustomEdge({
   markerEnd,
   id,
   onDelete,
+  data,
 }: EdgeProps & { onDelete?: (edgeId: string) => void }) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -67,6 +68,19 @@ export function CustomEdge({
         fill="none"
         markerEnd={markerEnd}
       />
+      {/* Label da condição */}
+      {data?.condition && (
+        <text
+          x={labelX}
+          y={labelY}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="fill-current text-xs font-medium"
+          style={{ pointerEvents: 'none' }}
+        >
+          {data.condition}
+        </text>
+      )}
       {isHovered && (
         <foreignObject
           x={labelX - 20}
