@@ -4,6 +4,7 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface BaseFormProps {
   label: string;
@@ -32,6 +33,8 @@ interface ActionFormProps extends BaseFormProps {
     action: string;
     phone?: string;
     response?: string;
+    credentials?: string;
+    baseScript?: string;
   };
   onConfigChange: (config: any) => void;
 }
@@ -258,6 +261,29 @@ export const ActionForm: React.FC<ActionFormProps> = ({
             value={label}
             onChange={(e) => onLabelChange(e.target.value)}
             placeholder="Nome da ação"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Credencial de Conexão</Label>
+          <Input
+            value={localConfig.credentials || ''}
+            onChange={(e) => handleConfigChange({ 
+              ...localConfig, 
+              credentials: e.target.value 
+            })}
+            placeholder="Digite a credencial de conexão"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Script Base para IA</Label>
+          <Textarea
+            value={localConfig.baseScript || ''}
+            onChange={(e) => handleConfigChange({ 
+              ...localConfig, 
+              baseScript: e.target.value 
+            })}
+            placeholder="Digite o script base para a IA"
+            className="min-h-[150px]"
           />
         </div>
       </div>

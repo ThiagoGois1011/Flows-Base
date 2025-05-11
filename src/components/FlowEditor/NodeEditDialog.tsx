@@ -40,20 +40,38 @@ export function NodeEditDialog({
   
   const handleSave = useCallback(() => {
     if (nodeId) {
-      onSave(nodeId, { ...formData, label: label });
+      const saveData = {
+        ...formData,
+        label: label,
+        config: {
+          ...formData.config,
+          credentials: formData.config?.credentials || '',
+          baseScript: formData.config?.baseScript || ''
+        }
+      };
+      onSave(nodeId, saveData);
       onOpenChange(false);
     }
   }, [nodeId, label, formData, onSave, onOpenChange]);
 
   const handleLabelChange = useCallback((value: string) => {
     setLabel(value);
-    console.log("rodando");
-    
   }, []);
 
   const handleFormDataChange = useCallback((newData: any) => {
-    setFormData(prevData => ({ ...prevData, ...newData }));
-  }, []);
+    setFormData(prevData => {
+      const updatedData = { ...prevData, ...newData };
+      if (nodeType === 'action' && newData.config) {
+        updatedData.config = {
+          ...prevData.config,
+          ...newData.config,
+          credentials: newData.config.credentials || prevData.config?.credentials || '',
+          baseScript: newData.config.baseScript || prevData.config?.baseScript || ''
+        };
+      }
+      return updatedData;
+    });
+  }, [nodeType]);
 
   const renderForm = useCallback(() => {
     switch (nodeType) {

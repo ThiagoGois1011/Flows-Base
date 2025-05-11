@@ -13,12 +13,12 @@ export const getNodeLabel = (type: NodeType, config: NodeConfig): string => {
       }
       if (config.type === 'openai') {
         switch (config.config?.action) {
-          case 'create_assistant':
-            return 'Criar Assistente';
-          case 'text_response':
+          case 'response_with_text':
             return 'Responder com Texto';
-          case 'audio_response':
+          case 'response_with_audio':
             return 'Responder com Áudio';
+          case 'generate_image':
+            return 'Gerar Imagem';
           default:
             return 'Ação OpenAI';
         }
