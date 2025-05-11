@@ -18,7 +18,7 @@ interface FlowStore extends FlowState {
   fetchFlows: () => Promise<void>;
   createFlow: (name: string) => Promise<void>;
   setCurrentFlow: (flowId: string) => Promise<void>;
-  updateFlow: (flowId: string, data: Partial<Flow>) => void;
+  updateFlow: (flow: Flow) => void;
   getNodes: () => FlowNode[];
   getEdges: () => Edge[];
   updateNodes: (nodes: FlowNode[]) => void;
@@ -124,13 +124,13 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
     }
   },
 
-  updateFlow: (flowId: string, data: Partial<Flow>) => {
+  updateFlow: (flow: Flow) => {
     set((state) => ({
-      flows: state.flows.map((flow) =>
-        flow.id === flowId ? { ...flow, ...data } : flow
+      flows: state.flows.map((f) =>
+        f.id === flow.id ? flow : f
       ),
-      currentFlow: state.currentFlow?.id === flowId
-        ? { ...state.currentFlow, ...data }
+      currentFlow: state.currentFlow?.id === flow.id
+        ? flow
         : state.currentFlow,
     }));
   },

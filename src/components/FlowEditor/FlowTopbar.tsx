@@ -10,9 +10,7 @@ export default function FlowTopbar() {
 
   const handleSave = () => {
     if (!currentFlow) return;
-    
-    // Aqui você pode adicionar lógica adicional antes de salvar
-    updateFlow(currentFlow.id, currentFlow);
+    updateFlow(currentFlow);
   };
 
   return (

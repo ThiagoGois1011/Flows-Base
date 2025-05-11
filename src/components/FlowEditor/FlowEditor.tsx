@@ -16,6 +16,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import FlowSidebar from "./FlowSidebar";
 import FlowTopbar from "./FlowTopbar";
+import FlowRightSidebar from "./FlowRightSidebar";
 import { useFlowStore } from "@/store/flowStore";
 import { useFlowNodes } from "@/hooks/useFlowNodes";
 import { TriggerNode, ActionNode, ConditionNode, DelayNode, WebhookNode } from "./CustomNodes";
@@ -154,6 +155,8 @@ export default function FlowEditor() {
           </ReactFlow>
         </div>
       </div>
+
+      <FlowRightSidebar />
 
       <NodeEditDialog
         isOpen={isEditDialogOpen}
