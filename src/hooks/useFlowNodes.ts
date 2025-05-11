@@ -26,6 +26,10 @@ export const getNodeLabel = (type: NodeType, config: NodeConfig): string => {
       return config.type || 'Ação';
     case 'condition':
       return config.config?.condition || 'Condição';
+    case 'webhook':
+      return 'Webhook';
+    case 'delay':
+      return 'Atraso';
     default:
       return 'Nó';
   }
@@ -51,17 +55,19 @@ export const useFlowNodes = () => {
     setModalOpen(true);
   }, [setSelectedComponent, setNodeConfig, setModalOpen]);
 
-  const handleCreateNode = useCallback((component: ComponentItem) => {
+  const handleCreateNode = useCallback((component: ComponentItem, customNodeConfig?: NodeConfig) => {
     if (!currentFlow) return;
+    
+    const configToUse = customNodeConfig || nodeConfig;
     
     const newNode: FlowNode = {
       id: `${component.id}-${Date.now()}`,
       type: component.type,
       position: { x: 100, y: 100 },
       data: {
-        label: getNodeLabel(component.type, nodeConfig),
-        type: nodeConfig.type,
-        config: nodeConfig.config || {}
+        label: getNodeLabel(component.type, configToUse),
+        type: configToUse.type || '',
+        config: configToUse.config || {}
       }
     };
 
@@ -73,7 +79,7 @@ export const useFlowNodes = () => {
     setNodeConfig({});
 
     return newNode.id;
-  }, [currentFlow, nodeConfig, getNodes, updateNodes, setModalOpen, setSelectedComponent, setNodeConfig]);
+  }, [currentFlow, nodeConfig, getNodes, setModalOpen, setSelectedComponent, setNodeConfig]);
 
   const handleDeleteNode = useCallback((nodeId: string) => {
     if (!currentFlow) return;

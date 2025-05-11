@@ -55,7 +55,6 @@ export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
     selectedComponent,
     nodeConfig,
     setModalOpen,
-    setSelectedComponent,
     setNodeConfig
   } = useFlowStore();
 
@@ -69,10 +68,17 @@ export default function FlowSidebar({ onNodeCreated }: FlowSidebarProps) {
     const directCreateComponents = ['delay', 'condition', 'webhook'];
     
     if (directCreateComponents.includes(component.type)) {
-      setSelectedComponent(component);
-      const nodeId = handleCreateNode(component);
+      let initialConfig = {};
+      
+      if (component.type === 'delay') {
+        initialConfig = { config: { seconds: 0 } };
+      } else if (component.type === 'webhook') {
+        initialConfig = { config: { method: 'GET' } };
+      }
+      
+      const nodeId = handleCreateNode(component, initialConfig);
       if (nodeId) {
-        const label = getNodeLabel(component.type, { type: component.type });
+        const label = getNodeLabel(component.type, initialConfig);
         onNodeCreated(nodeId, label, component.type, { type: component.type });
       }
       return;

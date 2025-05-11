@@ -22,8 +22,12 @@ interface ConditionFormProps extends BaseFormProps {
 
 interface WebhookFormProps extends BaseFormProps {
   url: string;
+  config: {
+    method: string;
+  };
   params: { key: string; value: string }[];
   onUrlChange: (value: string) => void;
+  onConfigChange: (config: any) => void;
   onParamsChange: (params: { key: string; value: string }[]) => void;
 }
 
@@ -35,6 +39,13 @@ interface ActionFormProps extends BaseFormProps {
     response?: string;
     credentials?: string;
     baseScript?: string;
+  };
+  onConfigChange: (config: any) => void;
+}
+
+interface DelayFormProps extends BaseFormProps {
+  config: {
+    seconds: number;
   };
   onConfigChange: (config: any) => void;
 }
@@ -134,8 +145,10 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
   label,
   onLabelChange,
   url,
+  config,
   params,
   onUrlChange,
+  onConfigChange,
   onParamsChange,
 }) => {
   const [localUrl, setLocalUrl] = React.useState(url);
@@ -168,6 +181,21 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
           onChange={(e) => onLabelChange(e.target.value)}
           placeholder="Nome do webhook"
         />
+      </div>
+      <div className="space-y-2">
+        <Label>Método HTTP</Label>
+        <Select 
+          value={config.method || "GET"} 
+          onValueChange={(value) => onConfigChange({ ...config, method: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o método" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="GET">GET</SelectItem>
+            <SelectItem value="POST">POST</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-2">
         <Label>URL</Label>
@@ -290,5 +318,51 @@ export const ActionForm: React.FC<ActionFormProps> = ({
     );
   }
 
-  return null;
+  return (
+    <div className="space-y-4">
+      <p>Nó com configurações incompletas</p>
+    </div>
+  );
+};
+
+export const DelayForm: React.FC<DelayFormProps> = ({
+  label,
+  onLabelChange,
+  config,
+  onConfigChange,
+}) => {
+  const [localSeconds, setLocalSeconds] = React.useState(config.seconds || 0);
+
+  React.useEffect(() => {
+    setLocalSeconds(config.seconds || 0);
+  }, [config.seconds]);
+
+  const handleSecondsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 0;
+    setLocalSeconds(value);
+    onConfigChange({ ...config, seconds: value });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Nome do Atraso</Label>
+        <Input
+          value={label}
+          onChange={(e) => onLabelChange(e.target.value)}
+          placeholder="Nome do atraso"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Tempo de Atraso (segundos)</Label>
+        <Input
+          type="number"
+          min="0"
+          value={localSeconds}
+          onChange={handleSecondsChange}
+          placeholder="Digite o tempo de atraso em segundos"
+        />
+      </div>
+    </div>
+  );
 }; 

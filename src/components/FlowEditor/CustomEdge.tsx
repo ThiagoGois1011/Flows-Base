@@ -27,12 +27,10 @@ export function CustomEdge({
   });
 
   const handleMouseEnter = useCallback(() => {
-    console.log("Mouse Enter");
     setIsHovered(true);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    console.log("Mouse Leave");
     setIsHovered(false);
   }, []);
 

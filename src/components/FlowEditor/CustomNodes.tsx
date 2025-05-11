@@ -125,8 +125,7 @@ export function BaseNode({ data, id, onEditClick, nodeStyle, icon, type }: BaseN
 export function TriggerNode(props: NodeProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { getNodes, getEdges, updateNodes, updateEdges } = useFlowStore();
-  console.log(props);
-
+  
   const nodeType = props.data?.type || 'init';
 
   const handleDelete = useCallback(() => {
@@ -141,10 +140,10 @@ export function TriggerNode(props: NodeProps) {
   }, [getNodes, getEdges, updateNodes, updateEdges, props.id]);
 
   const handleEdit = useCallback(() => {
-    if (props.data?.onEditClick) {
-      props.data.onEditClick(props.id, props.data?.label || 'Gatilho');
+    if (props.onEditClick) {
+      props.onEditClick(props.id, props.data?.label || 'Gatilho');
     }
-  }, [props.data, props.id]);
+  }, [props.onEditClick, props.id, props.data?.label]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -214,10 +213,10 @@ export function ActionNode(props: NodeProps) {
   }, [getNodes, getEdges, updateNodes, updateEdges, props.id]);
 
   const handleEdit = useCallback(() => {
-    if (props.data?.onEditClick) {
-      props.data.onEditClick(props.id, props.data?.label || 'Ação');
+    if (props.onEditClick) {
+      props.onEditClick(props.id, props.data?.label || 'Ação');
     }
-  }, [props.data, props.id]);
+  }, [props.onEditClick, props.id, props.data?.label]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -315,10 +314,10 @@ export function ConditionNode(props: NodeProps) {
   }, [getNodes, getEdges, updateNodes, updateEdges, props.id]);
 
   const handleEdit = useCallback(() => {
-    if (props.data?.onEditClick) {
-      props.data.onEditClick(props.id, props.data?.label || 'Condição');
+    if (props.onEditClick) {
+      props.onEditClick(props.id, props.data?.label || 'Condição');
     }
-  }, [props.data, props.id]);
+  }, [props.onEditClick, props.id, props.data?.label]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -374,33 +373,147 @@ export function ConditionNode(props: NodeProps) {
 }
 
 export function DelayNode(props: NodeProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const { getNodes, getEdges, updateNodes, updateEdges } = useFlowStore();
+
+  const handleDelete = useCallback(() => {
+    const currentNodes = getNodes();
+    const currentEdges = getEdges();
+    
+    const newNodes = currentNodes.filter((node) => node.id !== props.id);
+    const newEdges = currentEdges.filter((edge) => edge.source !== props.id && edge.target !== props.id);
+    
+    updateNodes(newNodes);
+    updateEdges(newEdges);
+  }, [getNodes, getEdges, updateNodes, updateEdges, props.id]);
+
+  const handleEdit = useCallback(() => {
+    if (props.onEditClick) {
+      props.onEditClick(props.id, props.data?.label || 'Atraso');
+    }
+  }, [props.onEditClick, props.id, props.data?.label]);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
   return (
-    <BaseNode
-      {...props}
-      nodeStyle={{
-        border: "border-gray-400",
-        bg: "bg-gray-100",
-        badge: "bg-gray-400",
-        text: "text-gray-900"
-      }}
-      icon={<StopwatchIcon className="mr-1" />}
-      type="Atraso"
-    />
+    <div 
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div 
+        className={`absolute -top-10 left-1/2 transform -translate-x-1/2 flex gap-2 transition-all duration-200 ease-in-out ${
+          isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+        }`}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full bg-white shadow-md hover:bg-destructive hover:text-white transition-colors duration-200"
+          onClick={handleDelete}
+        >
+          <TrashIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full bg-white shadow-md hover:bg-primary hover:text-white transition-colors duration-200"
+          onClick={handleEdit}
+        >
+          <Pencil1Icon className="h-4 w-4" />
+        </Button>
+      </div>
+      <div 
+        className={`rounded-lg border-2 border-gray-400 bg-gray-100 px-6 py-4 flex flex-col items-center shadow-md transition-all duration-200 ${
+          isHovered ? 'shadow-lg' : ''
+        }`}
+      >
+        <Badge className="bg-gray-400 text-gray-900 mb-1">
+          <StopwatchIcon className="mr-1" /> Atraso
+        </Badge>
+        <span className="font-bold">{props.data?.label || 'Atraso'}</span>
+        <Handle type="target" position={Position.Left} />
+        <Handle type="source" position={Position.Right} />
+      </div>
+    </div>
   );
 }
 
 export function WebhookNode(props: NodeProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const { getNodes, getEdges, updateNodes, updateEdges } = useFlowStore();
+
+  const handleDelete = useCallback(() => {
+    const currentNodes = getNodes();
+    const currentEdges = getEdges();
+    
+    const newNodes = currentNodes.filter((node) => node.id !== props.id);
+    const newEdges = currentEdges.filter((edge) => edge.source !== props.id && edge.target !== props.id);
+    
+    updateNodes(newNodes);
+    updateEdges(newEdges);
+  }, [getNodes, getEdges, updateNodes, updateEdges, props.id]);
+
+  const handleEdit = useCallback(() => {
+    if (props.onEditClick) {
+      props.onEditClick(props.id, props.data?.label || 'Webhook');
+    }
+  }, [props.onEditClick, props.id, props.data?.label]);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
   return (
-    <BaseNode
-      {...props}
-      nodeStyle={{
-        border: "border-green-400",
-        bg: "bg-green-100",
-        badge: "bg-green-400",
-        text: "text-green-900"
-      }}
-      icon={<GlobeIcon className="mr-1" />}
-      type="Webhook"
-    />
+    <div 
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div 
+        className={`absolute -top-10 left-1/2 transform -translate-x-1/2 flex gap-2 transition-all duration-200 ease-in-out ${
+          isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+        }`}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full bg-white shadow-md hover:bg-destructive hover:text-white transition-colors duration-200"
+          onClick={handleDelete}
+        >
+          <TrashIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full bg-white shadow-md hover:bg-primary hover:text-white transition-colors duration-200"
+          onClick={handleEdit}
+        >
+          <Pencil1Icon className="h-4 w-4" />
+        </Button>
+      </div>
+      <div 
+        className={`rounded-lg border-2 border-green-400 bg-green-100 px-6 py-4 flex flex-col items-center shadow-md transition-all duration-200 ${
+          isHovered ? 'shadow-lg' : ''
+        }`}
+      >
+        <Badge className="bg-green-400 text-green-900 mb-1">
+          <GlobeIcon className="mr-1" /> Webhook
+        </Badge>
+        <span className="font-bold">{props.data?.label || 'Webhook'}</span>
+        <Handle type="target" position={Position.Left} />
+        <Handle type="source" position={Position.Right} />
+      </div>
+    </div>
   );
 } 

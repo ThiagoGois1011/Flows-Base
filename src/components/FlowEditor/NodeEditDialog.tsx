@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useState } from "react";
-import { TriggerForm, ConditionForm, WebhookForm, ActionForm } from "./NodeTypeForms";
+import { TriggerForm, ConditionForm, WebhookForm, ActionForm, DelayForm } from "./NodeTypeForms";
 
 interface NodeEditDialogProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ interface NodeEditDialogProps {
   nodeType: string;
   initialData?: any;
   onSave: (nodeId: string, data: any) => void;
+  onEditClick?: (nodeId: string, label: string) => void;
 }
 
 export function NodeEditDialog({
@@ -27,6 +28,7 @@ export function NodeEditDialog({
   nodeType,
   initialData = {},
   onSave,
+  onEditClick,
 }: NodeEditDialogProps) {
   const [formData, setFormData] = useState(initialData);
   const [label, setLabel] = useState(initialLabel);
@@ -43,16 +45,16 @@ export function NodeEditDialog({
       const saveData = {
         ...formData,
         label: label,
-        config: {
+        config: formData.config?.type === 'openai' ? {
           ...formData.config,
           credentials: formData.config?.credentials || '',
           baseScript: formData.config?.baseScript || ''
-        }
+        } : formData.config
       };
       onSave(nodeId, saveData);
       onOpenChange(false);
     }
-  }, [nodeId, label, formData, onSave, onOpenChange]);
+  }, [nodeId, label, formData, onSave, onOpenChange, nodeType]);
 
   const handleLabelChange = useCallback((value: string) => {
     setLabel(value);
@@ -96,8 +98,10 @@ export function NodeEditDialog({
             label={label}
             onLabelChange={handleLabelChange}
             url={formData.url || ""}
+            config={formData.config || { method: "GET" }}
             params={formData.params || []}
             onUrlChange={(value) => handleFormDataChange({ url: value })}
+            onConfigChange={(config) => handleFormDataChange({ config })}
             onParamsChange={(params) => handleFormDataChange({ params })}
           />
         );
@@ -108,6 +112,15 @@ export function NodeEditDialog({
             onLabelChange={handleLabelChange}
             type={formData.type || ""}
             config={formData.config || {}}
+            onConfigChange={(config) => handleFormDataChange({ config })}
+          />
+        );
+      case "delay":
+        return (
+          <DelayForm
+            label={label}
+            onLabelChange={handleLabelChange}
+            config={formData.config || { seconds: 0 }}
             onConfigChange={(config) => handleFormDataChange({ config })}
           />
         );
