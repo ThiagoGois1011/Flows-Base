@@ -1,7 +1,23 @@
 import { create } from 'zustand';
 import { Flow, FlowNode, FlowState } from '@/types';
-import { getFlows, createFlow as createFlowApi, getFlowById } from '@/lib/api';
+import { getFlows, createFlow as createFlowApi, getFlowById, updateFlow as updateFlowApi } from '@/lib/api';
 import { Edge } from 'reactflow';
+
+// Função auxiliar para debounce
+const createDebouncedUpdate = () => {
+  let timeoutId: NodeJS.Timeout | null = null;
+  
+  return (callback: () => Promise<void>) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    
+    timeoutId = setTimeout(async () => {
+      await callback();
+      timeoutId = null;
+    }, 2000);
+  };
+};
 
 interface FlowStore extends FlowState {
   currentFlow: Flow | null;
@@ -32,120 +48,164 @@ interface FlowStore extends FlowState {
   setNodeConfig: (config: NodeConfig) => void;
 }
 
-export const useFlowStore = create<FlowStore>((set, get) => ({
-  flows: [],
-  selectedFlow: null,
-  currentFlow: null,
-  currentStep: 1,
-  isLoading: false,
-  error: null,
-  isEditDialogOpen: false,
-  editingNodeId: null,
-  editingNodeLabel: "",
-  editingNodeType: "",
-  editingNodeData: {},
-  isModalOpen: false,
-  selectedComponent: null,
-  nodeConfig: {},
+export const useFlowStore = create<FlowStore>((set, get) => {
+  const debouncedUpdate = createDebouncedUpdate();
 
-  setCurrentStep: (step: number) => set({ currentStep: step }),
+  return {
+    flows: [],
+    selectedFlow: null,
+    currentFlow: null,
+    currentStep: 1,
+    isLoading: false,
+    error: null,
+    isEditDialogOpen: false,
+    editingNodeId: null,
+    editingNodeLabel: "",
+    editingNodeType: "",
+    editingNodeData: {},
+    isModalOpen: false,
+    selectedComponent: null,
+    nodeConfig: {},
 
-  getNodes: () => get().currentFlow?.attributes.data.nodes || [],
-  getEdges: () => get().currentFlow?.attributes.data.edges || [],
+    setCurrentStep: (step: number) => set({ currentStep: step }),
 
-  updateNodes: (nodes: FlowNode[]) => {
-    const currentFlow = get().currentFlow;
-    if (!currentFlow) return;
+    getNodes: () => get().currentFlow?.attributes.data.nodes || [],
+    getEdges: () => get().currentFlow?.attributes.data.edges || [],
 
-    set((state) => ({
-      currentFlow: {
-        ...state.currentFlow!,
+    updateNodes: async (nodes: FlowNode[]) => {
+      const currentFlow = get().currentFlow;
+      if (!currentFlow) return;
+
+      const updatedFlow = {
+        ...currentFlow,
         attributes: {
-          ...state.currentFlow!.attributes,
+          ...currentFlow.attributes,
           data: {
-            ...state.currentFlow!.attributes.data,
+            ...currentFlow.attributes.data,
             nodes,
           },
         },
-      },
-    }));
-  },
+      };
 
-  updateEdges: (edges: Edge[]) => {
-    const currentFlow = get().currentFlow;
-    if (!currentFlow) return;
+      // Atualiza o estado local imediatamente
+      set({ currentFlow: updatedFlow });
 
-    set((state) => ({
-      currentFlow: {
-        ...state.currentFlow!,
+      // Agenda a atualização na API com debounce
+      debouncedUpdate(async () => {
+        try {
+          const response = await updateFlowApi(currentFlow.id, updatedFlow.attributes);
+          set({ currentFlow: response.data });
+        } catch (error) {
+          set({ error: 'Erro ao atualizar nós do flow' });
+        }
+      });
+    },
+
+    updateEdges: async (edges: Edge[]) => {
+      const currentFlow = get().currentFlow;
+      if (!currentFlow) return;
+
+      const updatedFlow = {
+        ...currentFlow,
         attributes: {
-          ...state.currentFlow!.attributes,
+          ...currentFlow.attributes,
           data: {
-            ...state.currentFlow!.attributes.data,
+            ...currentFlow.attributes.data,
             edges,
           },
         },
-      },
-    }));
-  },
+      };
 
-  fetchFlows: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await getFlows();
-      set({ flows: response.data, isLoading: false });
-    } catch (error) {
-      set({ error: 'Erro ao carregar flows', isLoading: false });
-    }
-  },
+      // Atualiza o estado local imediatamente
+      set({ currentFlow: updatedFlow });
 
-  createFlow: async (name: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await createFlowApi(name);
+      // Agenda a atualização na API com debounce
+      debouncedUpdate(async () => {
+        try {
+          const response = await updateFlowApi(currentFlow.id, updatedFlow.attributes);
+          set({ currentFlow: response.data });
+        } catch (error) {
+          set({ error: 'Erro ao atualizar conexões do flow' });
+        }
+      });
+    },
+
+    updateFlow: async (flow: Flow) => {
+      // Atualiza o estado local imediatamente
       set((state) => ({
-        flows: [...state.flows, response.data],
-        isLoading: false,
+        flows: state.flows.map((f) =>
+          f.id === flow.id ? flow : f
+        ),
+        currentFlow: state.currentFlow?.id === flow.id
+          ? flow
+          : state.currentFlow,
       }));
-      return response.data;
-    } catch (error) {
-      set({ error: 'Erro ao criar flow', isLoading: false });
-      throw error;
-    }
-  },
 
-  setCurrentFlow: async (flowId: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await getFlowById(flowId);
-      set({ currentFlow: response.data, isLoading: false });
-    } catch (error) {
-      set({ error: 'Erro ao carregar flow', isLoading: false });
-    }
-  },
+      // Agenda a atualização na API com debounce
+      debouncedUpdate(async () => {
+        try {
+          const response = await updateFlowApi(flow.id, flow.attributes);
+          set((state) => ({
+            flows: state.flows.map((f) =>
+              f.id === flow.id ? response.data : f
+            ),
+            currentFlow: state.currentFlow?.id === flow.id
+              ? response.data
+              : state.currentFlow,
+          }));
+        } catch (error) {
+          set({ error: 'Erro ao atualizar flow' });
+        }
+      });
+    },
 
-  updateFlow: (flow: Flow) => {
-    set((state) => ({
-      flows: state.flows.map((f) =>
-        f.id === flow.id ? flow : f
-      ),
-      currentFlow: state.currentFlow?.id === flow.id
-        ? flow
-        : state.currentFlow,
-    }));
-  },
+    fetchFlows: async () => {
+      set({ isLoading: true, error: null });
+      try {
+        const response = await getFlows();
+        set({ flows: response.data, isLoading: false });
+      } catch (error) {
+        set({ error: 'Erro ao carregar flows', isLoading: false });
+      }
+    },
 
-  setEditDialogOpen: (open: boolean) => set({ isEditDialogOpen: open }),
-  
-  setEditingNode: (nodeId: string | null, label: string, type: string, data: any) => 
-    set({ 
-      editingNodeId: nodeId,
-      editingNodeLabel: label,
-      editingNodeType: type,
-      editingNodeData: data
-    }),
+    createFlow: async (name: string) => {
+      set({ isLoading: true, error: null });
+      try {
+        const response = await createFlowApi(name);
+        set((state) => ({
+          flows: [...state.flows, response.data],
+          isLoading: false,
+        }));
+        return response.data;
+      } catch (error) {
+        set({ error: 'Erro ao criar flow', isLoading: false });
+        throw error;
+      }
+    },
 
-  setModalOpen: (open: boolean) => set({ isModalOpen: open }),
-  setSelectedComponent: (component: ComponentItem | null) => set({ selectedComponent: component }),
-  setNodeConfig: (config: NodeConfig) => set({ nodeConfig: config }),
-})); 
+    setCurrentFlow: async (flowId: string) => {
+      set({ isLoading: true, error: null });
+      try {
+        const response = await getFlowById(flowId);
+        set({ currentFlow: response.data, isLoading: false });
+      } catch (error) {
+        set({ error: 'Erro ao carregar flow', isLoading: false });
+      }
+    },
+
+    setEditDialogOpen: (open: boolean) => set({ isEditDialogOpen: open }),
+    
+    setEditingNode: (nodeId: string | null, label: string, type: string, data: any) => 
+      set({ 
+        editingNodeId: nodeId,
+        editingNodeLabel: label,
+        editingNodeType: type,
+        editingNodeData: data
+      }),
+
+    setModalOpen: (open: boolean) => set({ isModalOpen: open }),
+    setSelectedComponent: (component: ComponentItem | null) => set({ selectedComponent: component }),
+    setNodeConfig: (config: NodeConfig) => set({ nodeConfig: config }),
+  };
+}); 

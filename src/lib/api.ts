@@ -29,4 +29,11 @@ export const createFlow = async (name: string) => {
 export const deleteFlow = async (id: string) => {
   const { data } = await axios.delete(`${API_URL}/flows/${id}`);
   return data;
+};
+
+export const updateFlow = async (id: string, flowData: any) => {
+  const { data } = await axios.put(`${API_URL}/flows/${id}`, {
+    data: flowData
+  });
+  return data;
 }; 
