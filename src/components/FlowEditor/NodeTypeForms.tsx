@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { BaseForm } from './BaseForm';
 
 interface BaseFormProps {
   label: string;
@@ -54,16 +55,11 @@ interface DelayFormProps extends BaseFormProps {
 
 export const TriggerForm: React.FC<BaseFormProps> = ({ label, onLabelChange }) => {
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label>Nome do Gatilho</Label>
-        <Input
-          value={label}
-          onChange={(e) => onLabelChange(e.target.value)}
-          placeholder="Nome do gatilho"
-        />
-      </div>
-    </div>
+    <BaseForm
+      label={label}
+      onLabelChange={onLabelChange}
+      labelPlaceholder="Nome do gatilho"
+    />
   );
 };
 
